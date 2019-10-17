@@ -1,0 +1,8 @@
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+.qmake.stash
+Makefile
+qgetmirrorlist
+session.vim
