@@ -12,7 +12,7 @@ Besides Qt framework, two packages are needed for **rankmirrors** and **pkexec**
 
 ## Compilation
 
-Execute `qmake` to generate a Makefile from the Qt project file, followed by `make` to do the actual compilation of the `qGetMirrorList` binary.
+Execute `qmake` to generate a Makefile from the Qt project file, followed by `make` to do the actual compilation of the `qgetmirrorlist` binary.
 
 ## How to use
 
@@ -25,6 +25,10 @@ The button *Rank selected* returns a list of the selected mirrors ordered by spe
 ## Screenshot
 
 ![Screenshot](https://i.imgur.com/1exqoqN.png)
+
+## Future goals
+
+A medium-term goal of this software is to achieve what [Xyne](https://xyne.archlinux.ca/) has achieved with his (or perhaps her) script [reflector](https://xyne.archlinux.ca/projects/reflector/), which is a more complete and complex tool for the same purpose as this one.
 
 ## Credits
 
