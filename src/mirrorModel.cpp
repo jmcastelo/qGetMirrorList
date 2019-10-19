@@ -19,6 +19,7 @@
 
 MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
+    // Set least restrictive filter
     filter.protocolList.append("http");
     filter.protocolList.append("https");
     filter.ipv4 = 1;
@@ -26,6 +27,7 @@ MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
     filter.statusOK = true;
     filter.statusKO = true;
     
+    // Connections
     connect(&theMirrorManager, &MirrorManager::mirrorListReady, this, &MirrorModel::setMirrorList);
     connect(&rankmirrors, &QProcess::started, this, &MirrorModel::rankingMirrors);
     connect(&rankmirrors, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MirrorModel::readRankedMirrorList);
@@ -74,6 +76,7 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     QPixmap tick(":/images/icons/tick.png");
     QPixmap cross(":/images/icons/cross.png");
 
+    // For IP versions and status columns, set tick and cross pixmaps
     if (role == Qt::DecorationRole) {
         if (col == 1) {
             return mirrorList.at(row).flag;
@@ -100,6 +103,7 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         }
     }
 
+    // For Url, country and protocol columns, set corresponding strings
     if (role == Qt::DisplayRole) {
         if (col == 0) {
             return mirrorList.at(row).url;
@@ -208,6 +212,7 @@ void MirrorModel::rankMirrorList()
     rankmirrors.start(program, arguments);
 }
 
+// Parse output of 'rankmirrors' process to get ordered mirrors
 void MirrorModel::readRankedMirrorList(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitCode == 0) {
@@ -244,6 +249,7 @@ void MirrorModel::cancelRankingMirrorList()
     emit rankingMirrorsCancelled(0);
 }
 
+// Updating mirror list requires root privileges. Using 'pkexec' to elevate user to root.
 void MirrorModel::updateMirrorList()
 {
     saveMirrorList("/tmp/mirrorlist");

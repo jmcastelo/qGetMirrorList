@@ -24,6 +24,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
+    // Model and table view associated with the mirrors
     mirrorModel = new MirrorModel(this);
 
     tableView = new QTableView;
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     selectionModelTableView = tableView->selectionModel();
 
+    // Model and list view associated with the countries
     countryModel = new CountryModel(this);
 
     listView = new QListView;
@@ -143,6 +145,7 @@ void MainWindow::createMirrorActionsGroubBox()
     showAllMirrorsButton->setToolTip("Show all mirrors");
     updateMirrorListButton->setToolTip("Update '/etc/pacman.d/mirrorlist' with selected mirrors as root");
 
+    // Set buttons disabled before user gets mirror list
     saveMirrorListButton->setDisabled(true);
     rankMirrorListButton->setDisabled(true);
     showAllMirrorsButton->setDisabled(true);
@@ -240,6 +243,7 @@ void MainWindow::createMirrorTableGroupBox()
     mirrorTableGroupBox->setLayout(layout);
 }
 
+// Once user gets mirror list, enable buttons and checkboxes
 void MainWindow::enableWidgets()
 {
     if (!saveMirrorListButton->isEnabled()) {
@@ -274,6 +278,7 @@ void MainWindow::enableWidgets()
     }
 }
 
+// When mirror table cell pressed, select whole row
 void MainWindow::affectWholeRow(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QModelIndex firstColumn, lastColumn;
@@ -411,6 +416,7 @@ void MainWindow::statusKOCB(int state)
 
 void MainWindow::showAllMirrors()
 {
+    // Set least restrictive filters and filter mirror list
     mirrorModel->filter.countryList.clear();
     mirrorModel->filter.protocolList.clear();
     mirrorModel->filter.protocolList.append("http");
@@ -422,6 +428,7 @@ void MainWindow::showAllMirrors()
 
     mirrorModel->filterMirrorList();
 
+    // Set filter checkboxes accordingly
     httpCheckBox->setCheckState(Qt::Checked);
     httpsCheckBox->setCheckState(Qt::Checked);
     ipv4CheckBox->setCheckState(Qt::PartiallyChecked);

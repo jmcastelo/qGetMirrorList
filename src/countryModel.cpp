@@ -49,6 +49,7 @@ QVariant CountryModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
+    // Select country name or flag according to role
     if (role == Qt::DisplayRole) {
         return countryList.at(index.row()).name;
     } else if (role == Qt::DecorationRole) {
@@ -58,6 +59,7 @@ QVariant CountryModel::data(const QModelIndex &index, int role) const
     }
 }
 
+// Headers do not seem to apply to a list view. This method exists, anyway.
 QVariant CountryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole) {

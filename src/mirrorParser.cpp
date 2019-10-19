@@ -32,6 +32,7 @@ void MirrorParser::parseMirrorList()
 {
     mirrorList.clear();
 
+    // Split fetched mirror list at newlines
     QStringList lines = rawData.split('\n', QString::SkipEmptyParts);
     
     QString country, mirrorUrl;
@@ -591,6 +592,7 @@ void MirrorParser::parseCountries()
     
     Country oneCountry;
     
+    // Split fetched mirror list at newlines
     QStringList lines = rawData.split('\n', QString::SkipEmptyParts);
 
     QString countryName;

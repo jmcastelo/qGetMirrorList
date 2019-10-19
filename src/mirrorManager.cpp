@@ -21,6 +21,7 @@ MirrorManager::MirrorManager()
 {
     urls.clear();
     
+    // Urls to query for mirrors and their supported IP versions and status
     urls.append(QUrl("https://www.archlinux.org/mirrorlist/all/"));
     urls.append(QUrl("https://www.archlinux.org/mirrorlist/?country=all&ip_version=4"));
     urls.append(QUrl("https://www.archlinux.org/mirrorlist/?country=all&ip_version=6"));
@@ -30,6 +31,7 @@ MirrorManager::MirrorManager()
     connect(&theNetwork, &Network::dataRead, this, &MirrorManager::parseCountryList);
 }
 
+// Parse fetched mirror list according to Url
 void MirrorManager::parseMirrorList(QUrl url)
 {
     if (gettingMirrorList) {
@@ -63,6 +65,7 @@ void MirrorManager::getMirrorList()
     getNextMirrorList(urls.at(0));
 }
 
+// Set mirror IP versions and status
 void MirrorManager::processMirrorLists()
 {
     for (int i = 0; i < mirrorListAll.size(); i++) {
@@ -109,6 +112,7 @@ void MirrorManager::parseCountryList(QUrl url)
 
 QList<mirror> MirrorManager::filterMirrorList(mirrorFilter filter)
 {
+    // Don't filter if least restrictive filter set, just return all mirrors
     if (filter.countryList.isEmpty() &&
         filter.protocolList.contains("http") &&
         filter.protocolList.contains("https") &&
@@ -121,6 +125,7 @@ QList<mirror> MirrorManager::filterMirrorList(mirrorFilter filter)
 
     QList<mirror> filteredMirrorList;
 
+    // Do the filtering
     for (int i = 0; i < mirrorListAll.size(); i++) {
         if ((filter.countryList.isEmpty() ||
             filter.countryList.contains(mirrorListAll.at(i).country)) &&
