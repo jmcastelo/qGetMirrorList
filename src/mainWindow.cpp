@@ -109,10 +109,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttp);
     connect(httpsCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttps);
     connect(rsyncCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByRsync);
+    connect(activeCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByActive);
+    connect(isosCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIsos);
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
-    connect(statusOKCheckBox, &QCheckBox::stateChanged, this, &MainWindow::statusOKCB);
-    connect(statusKOCheckBox, &QCheckBox::stateChanged, this, &MainWindow::statusKOCB);
     connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
     connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
     connect(mirrorModel, &MirrorModel::rankingMirrorsEnd, waitForRankingDialog, &QDialog::done);
@@ -127,6 +127,7 @@ void MainWindow::createMirrorActionsGroubBox()
 {
     mirrorActionsGroupBox = new QGroupBox("Actions and Filters");
 
+    // Action buttons
     QGridLayout *buttonsLayout = new QGridLayout;
     
     getMirrorListButton = new QPushButton("Get mirror list");
@@ -163,6 +164,7 @@ void MainWindow::createMirrorActionsGroubBox()
 
     layout->addLayout(buttonsLayout);
 
+    // Protocol filters
     QGroupBox *protocolsGroupBox = new QGroupBox("Protocols");
 
     httpCheckBox = new QCheckBox("http", this);
@@ -187,6 +189,7 @@ void MainWindow::createMirrorActionsGroubBox()
 
     layout->addWidget(protocolsGroupBox);
 
+    // IP version filters
     QGroupBox *IPversionGroupBox = new QGroupBox(tr("IP Version"));
 
     ipv4CheckBox = new QCheckBox("IPv4", this);
@@ -210,26 +213,31 @@ void MainWindow::createMirrorActionsGroubBox()
 
     layout->addWidget(IPversionGroupBox);
 
-    QGroupBox *statusGroupBox = new QGroupBox(tr("Status"));
+    // Other filters: active, isos
+    QGroupBox *otherGroupBox = new QGroupBox("Other filters");
 
-    statusOKCheckBox = new QCheckBox("Updated", this);
-    statusKOCheckBox = new QCheckBox("Outdated", this);
+    activeCheckBox = new QCheckBox("Active", this);
+    isosCheckBox = new QCheckBox("ISOs hosted", this);
 
-    statusOKCheckBox->setCheckState(Qt::Checked);
-    statusKOCheckBox->setCheckState(Qt::Checked);
+    activeCheckBox->setTristate(true);
+    isosCheckBox->setTristate(true);
 
-    statusOKCheckBox->setDisabled(true);
-    statusKOCheckBox->setDisabled(true);
+    activeCheckBox->setCheckState(Qt::PartiallyChecked);
+    isosCheckBox->setCheckState(Qt::PartiallyChecked);
 
-    QHBoxLayout *statusLayout = new QHBoxLayout;
+    activeCheckBox->setDisabled(true);
+    isosCheckBox->setDisabled(true);
 
-    statusLayout->addWidget(statusOKCheckBox);
-    statusLayout->addWidget(statusKOCheckBox);
+    QHBoxLayout *otherLayout = new QHBoxLayout;
 
-    statusGroupBox->setLayout(statusLayout);
+    otherLayout->addWidget(activeCheckBox);
+    otherLayout->addWidget(isosCheckBox);
 
-    layout->addWidget(statusGroupBox);
+    otherGroupBox->setLayout(otherLayout);
 
+    layout->addWidget(otherGroupBox);
+
+    // Country list
     QLabel *listViewLabel = new QLabel("Countries");
     layout->addWidget(listViewLabel);
 
@@ -272,17 +280,17 @@ void MainWindow::enableWidgets()
     if (!rsyncCheckBox->isEnabled()) {
         rsyncCheckBox->setEnabled(true);
     }
+    if (!activeCheckBox->isEnabled()) {
+        activeCheckBox->setEnabled(true);
+    }
+    if (!isosCheckBox->isEnabled()) {
+        isosCheckBox->setEnabled(true);
+    }
     if (!ipv4CheckBox->isEnabled()) {
         ipv4CheckBox->setEnabled(true);
     }
     if (!ipv6CheckBox->isEnabled()) {
         ipv6CheckBox->setEnabled(true);
-    }
-    if (!statusOKCheckBox->isEnabled()) {
-        statusOKCheckBox->setEnabled(true);
-    }
-    if (!statusKOCheckBox->isEnabled()) {
-        statusKOCheckBox->setEnabled(true);
     }
 }
 
@@ -394,6 +402,18 @@ void MainWindow::filterByRsync(int state)
     }
 }
 
+void MainWindow::filterByActive(int state)
+{
+    mirrorModel->filter.active = state;
+    mirrorModel->filterMirrorList();
+}
+
+void MainWindow::filterByIsos(int state)
+{
+    mirrorModel->filter.isos = state;
+    mirrorModel->filterMirrorList();
+}
+
 void MainWindow::filterByIPv4(int state)
 {
     if (state == Qt::Unchecked && ipv6CheckBox->checkState() == Qt::Unchecked) {
@@ -414,34 +434,6 @@ void MainWindow::filterByIPv6(int state)
     }
 }
 
-void MainWindow::statusOKCB(int state)
-{
-    if (state == Qt::Unchecked && statusKOCheckBox->checkState() == Qt::Unchecked) {
-        statusOKCheckBox->setCheckState(Qt::Checked);
-    } else {
-        if (state == Qt::Checked) {
-            mirrorModel->filter.statusOK = true;
-        } else {
-            mirrorModel->filter.statusOK = false;
-        }
-        mirrorModel->filterMirrorList();
-    }
-}
-
-void MainWindow::statusKOCB(int state)
-{
-    if (state == Qt::Unchecked && statusOKCheckBox->checkState() == Qt::Unchecked) {
-        statusKOCheckBox->setCheckState(Qt::Checked);
-    } else {
-        if (state == Qt::Checked) {
-            mirrorModel->filter.statusKO = true;
-        } else {
-            mirrorModel->filter.statusKO = false;
-        }
-        mirrorModel->filterMirrorList();
-    }
-}
-
 void MainWindow::showAllMirrors()
 {
     // Set least restrictive filters and filter mirror list
@@ -449,20 +441,22 @@ void MainWindow::showAllMirrors()
     mirrorModel->filter.protocolList.clear();
     mirrorModel->filter.protocolList.append("http");
     mirrorModel->filter.protocolList.append("https");
+    mirrorModel->filter.protocolList.append("rsync");
+    mirrorModel->filter.active = 1;
+    mirrorModel->filter.isos = 1;
     mirrorModel->filter.ipv4 = 1;
     mirrorModel->filter.ipv6 = 1;
-    mirrorModel->filter.statusOK = true;
-    mirrorModel->filter.statusKO = true;
 
     mirrorModel->filterMirrorList();
 
     // Set filter checkboxes accordingly
     httpCheckBox->setCheckState(Qt::Checked);
     httpsCheckBox->setCheckState(Qt::Checked);
+    rsyncCheckBox->setCheckState(Qt::Checked);
+    activeCheckBox->setCheckState(Qt::PartiallyChecked);
+    isosCheckBox->setCheckState(Qt::PartiallyChecked);
     ipv4CheckBox->setCheckState(Qt::PartiallyChecked);
     ipv6CheckBox->setCheckState(Qt::PartiallyChecked);
-    statusOKCheckBox->setCheckState(Qt::Checked);
-    statusKOCheckBox->setCheckState(Qt::Checked);
 
     selectionModelListView->clearSelection();
 }

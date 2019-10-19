@@ -28,10 +28,10 @@ struct MirrorFilter
 {
     QStringList countryList;
     QStringList protocolList;
+    int active;
+    int isos;
     int ipv4;
     int ipv6;
-    bool statusOK;
-    bool statusKO;
 };
 
 class MirrorManager : public QObject

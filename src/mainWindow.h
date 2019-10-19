@@ -39,23 +39,30 @@ class MainWindow : public QWidget
 
     private slots:
         void enableWidgets();
+        
         void affectWholeRow(const QItemSelection &selected, const QItemSelection &deselected);
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
+        
         void showAllMirrors();
+
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
         void filterByHttp(int state);
         void filterByHttps(int state);
         void filterByRsync(int state);
+        void filterByActive(int state);
+        void filterByIsos(int state);
         void filterByIPv4(int state);
         void filterByIPv6(int state);
-        void statusOKCB(int state);
-        void statusKOCB(int state);
+        
         void rankMirrorList();
         void rankingError(QProcess::ProcessError error);
+        
         void updateMirrorList();
         void updateFinished(int exitCode, QProcess::ExitStatus exitStatus);
         void updateMirrorListError(QProcess::ProcessError error);
+        
         void openSaveDialog();
+        
         void about();
 
     private:
@@ -84,10 +91,10 @@ class MainWindow : public QWidget
         QCheckBox *httpCheckBox;
         QCheckBox *httpsCheckBox;
         QCheckBox *rsyncCheckBox;
+        QCheckBox *activeCheckBox;
+        QCheckBox *isosCheckBox;
         QCheckBox *ipv4CheckBox;
         QCheckBox *ipv6CheckBox;
-        QCheckBox *statusOKCheckBox;
-        QCheckBox *statusKOCheckBox;
 
         QFileDialog *saveMirrorListDialog;
         QDialog *waitForRankingDialog;

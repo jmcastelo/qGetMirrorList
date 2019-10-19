@@ -23,10 +23,10 @@ MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
     filter.protocolList.append("http");
     filter.protocolList.append("https");
     filter.protocolList.append("rsync");
+    filter.active = 1;
+    filter.isos = 1;
     filter.ipv4 = 1;
     filter.ipv6 = 1;
-    filter.statusOK = true;
-    filter.statusKO = true;
     
     // Connections
     connect(&theMirrorManager, &MirrorManager::mirrorListReady, this, &MirrorModel::setMirrorList);
@@ -58,7 +58,7 @@ int MirrorModel::rowCount(const QModelIndex &parent) const
 
 int MirrorModel::columnCount(const QModelIndex &parent) const
 {
-    return 6; 
+    return 7; 
 }
 
 QVariant MirrorModel::data(const QModelIndex &index, int role) const
@@ -94,7 +94,13 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
                 return cross;
             }
         } else if (col == 5) {
-            if (mirrorList.at(row).status) {
+            if (mirrorList.at(row).active) {
+                return tick;
+            } else {
+                return cross;
+            }
+        } else if (col == 6) {
+            if (mirrorList.at(row).isos) {
                 return tick;
             } else {
                 return cross;
@@ -138,7 +144,9 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
         } else if (section == 4) {
             return QString("IPv6");
         } else if (section == 5) {
-            return QString("Status");
+            return QString("Active");
+        } else if (section == 6) {
+            return QString("ISOs");
         }
     } else if (orientation == Qt::Vertical) {
         return QStringLiteral("%1").arg(section + 1);

@@ -61,10 +61,10 @@ QList<Mirror> MirrorManager::filterMirrorList(MirrorFilter filter)
         filter.protocolList.contains("http") &&
         filter.protocolList.contains("https") &&
         filter.protocolList.contains("rsync") &&
+        filter.active == 1 &&
+        filter.isos == 1 &&
         filter.ipv4 == 1 &&
-        filter.ipv6 == 1 &&
-        filter.statusOK &&
-        filter.statusKO) {
+        filter.ipv6 == 1) {
             return mirrorListAll;
     }
 
@@ -75,14 +75,18 @@ QList<Mirror> MirrorManager::filterMirrorList(MirrorFilter filter)
         if ((filter.countryList.isEmpty() ||
             filter.countryList.contains(mirrorListAll.at(i).country)) &&
             filter.protocolList.contains(mirrorListAll.at(i).protocol) &&
+            (filter.active== 1 ||
+            (filter.active == 2 && mirrorListAll.at(i).active) ||
+            (filter.active == 0 && !mirrorListAll.at(i).active)) &&
+            (filter.isos== 1 ||
+            (filter.isos== 2 && mirrorListAll.at(i).isos) ||
+            (filter.isos== 0 && !mirrorListAll.at(i).isos)) &&
             (filter.ipv4 == 1 ||
             (filter.ipv4 == 2 && mirrorListAll.at(i).ipv4) ||
             (filter.ipv4 == 0 && !mirrorListAll.at(i).ipv4)) &&
             (filter.ipv6 == 1 ||
             (filter.ipv6 == 2 && mirrorListAll.at(i).ipv6) ||
-            (filter.ipv6 == 0 && !mirrorListAll.at(i).ipv6)) &&
-            ((filter.statusOK && mirrorListAll.at(i).status) ||
-            (filter.statusKO && !mirrorListAll.at(i).status))) {
+            (filter.ipv6 == 0 && !mirrorListAll.at(i).ipv6))) { 
                 filteredMirrorList.append(mirrorListAll.at(i));
         }
     }
