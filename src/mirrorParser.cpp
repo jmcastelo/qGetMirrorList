@@ -35,25 +35,6 @@ QList<Mirror> MirrorParser::getMirrorList()
 void MirrorParser::parseMirrorList()
 {
     Mirror oneMirror;
-    oneMirror.url = "";
-    oneMirror.protocol = "";
-    oneMirror.last_sync = "";
-    oneMirror.completion_pct = -1;
-    oneMirror.delay = -1;
-    oneMirror.duration_avg = -1;
-    oneMirror.duration_stddev = -1;
-    oneMirror.score = -1;
-    oneMirror.active = false;
-    oneMirror.country = "";
-    oneMirror.country_code = "";
-    oneMirror.isos = false;
-    oneMirror.ipv4 = false;
-    oneMirror.ipv6 = false;
-    oneMirror.status = true;
-    oneMirror.selected = false;
-    oneMirror.flag = QPixmap();
-
-    mirrorList.clear();
 
     for (const QJsonValue &value : jsonMirrorArray) {
         QJsonObject loopObject = value.toObject();
@@ -61,7 +42,7 @@ void MirrorParser::parseMirrorList()
         oneMirror.url = loopObject["url"].toString();
         oneMirror.protocol = loopObject["protocol"].toString();
         oneMirror.last_sync = loopObject["last_sync"].toString();
-        oneMirror.completion_pct = loopObject["completion_pct"].toDouble();
+        oneMirror.completion_pct = 100*loopObject["completion_pct"].toDouble();
         oneMirror.delay = loopObject["delay"].toInt();
         oneMirror.duration_avg = loopObject["duration_avg"].toDouble();
         oneMirror.duration_stddev = loopObject["duration_stddev"].toDouble();
@@ -72,7 +53,6 @@ void MirrorParser::parseMirrorList()
         oneMirror.isos = loopObject["isos"].toBool();
         oneMirror.ipv4 = loopObject["ipv4"].toBool();
         oneMirror.ipv6 = loopObject["ipv6"].toBool();
-        oneMirror.status = true;
         oneMirror.selected = false;
         oneMirror.flag = getFlag(oneMirror.country_code);
 

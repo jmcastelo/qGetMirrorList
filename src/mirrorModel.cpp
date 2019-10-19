@@ -58,7 +58,7 @@ int MirrorModel::rowCount(const QModelIndex &parent) const
 
 int MirrorModel::columnCount(const QModelIndex &parent) const
 {
-    return 7; 
+    return 8; 
 }
 
 QVariant MirrorModel::data(const QModelIndex &index, int role) const
@@ -81,25 +81,25 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DecorationRole) {
         if (col == 1) {
             return mirrorList.at(row).flag;
-        } else if (col == 3) {
+        } else if (col == 4) {
             if (mirrorList.at(row).ipv4) {
                 return tick; 
             } else {
                 return cross;
             }
-        } else if (col == 4) {
+        } else if (col == 5) {
             if (mirrorList.at(row).ipv6) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 5) {
+        } else if (col == 6) {
             if (mirrorList.at(row).active) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 6) {
+        } else if (col == 7) {
             if (mirrorList.at(row).isos) {
                 return tick;
             } else {
@@ -118,6 +118,8 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
             return mirrorList.at(row).country;
         } else if (col == 2) {
             return mirrorList.at(row).protocol;
+        } else if (col == 3) {
+            return QString("%1\%").arg(mirrorList.at(row).completion_pct, 0, 'f', 2);
         } else {
             return QVariant();
         }
@@ -140,12 +142,14 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
         } else if (section == 2) {
             return QString("Protocol");
         } else if (section == 3) {
-            return QString("IPv4");
+            return QString("Completion");
         } else if (section == 4) {
-            return QString("IPv6");
+            return QString("IPv4");
         } else if (section == 5) {
-            return QString("Active");
+            return QString("IPv6");
         } else if (section == 6) {
+            return QString("Active");
+        } else if (section == 7) {
             return QString("ISOs");
         }
     } else if (orientation == Qt::Vertical) {
