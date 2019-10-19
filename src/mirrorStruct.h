@@ -21,14 +21,24 @@
 #include <QString>
 #include <QPixmap>
 
-struct mirror
+struct Mirror
 {
     QString url;
-    QString country;
     QString protocol;
+    QString last_sync;
+    double completion_pct;
+    int delay;
+    double duration_avg;
+    double duration_stddev;
+    double score;
+    bool active;
+    QString country;
+    QString country_code;
+    bool isos;
     bool ipv4;
     bool ipv6;
     bool status;
+    //QString details;
     bool selected;
     QPixmap flag;
 };
@@ -36,6 +46,7 @@ struct mirror
 struct Country
 {
     QString name;
+    QString code;
     QPixmap flag;
 };
 

@@ -37,7 +37,7 @@ class MirrorModel : public QAbstractTableModel
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         
-        mirrorFilter filter;
+        MirrorFilter filter;
         void filterMirrorList();
         void selectMirror(int index);
         void deselectMirror(int index);
@@ -59,12 +59,12 @@ class MirrorModel : public QAbstractTableModel
         void updateMirrorList();
 
     private slots:
-        void setMirrorList(QList<mirror> ml);
+        void setMirrorList(QList<Mirror> ml);
         void readRankedMirrorList(int exitCode, QProcess::ExitStatus exitStatus);
 
     private:
-        QList<mirror> mirrorList;
-        QList<mirror> selectedMirrorList;
+        QList<Mirror> mirrorList;
+        QList<Mirror> selectedMirrorList;
         QProcess rankmirrors;
         QProcess updatemirrorlist;
         MirrorManager theMirrorManager;

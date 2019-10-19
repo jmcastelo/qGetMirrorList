@@ -24,7 +24,7 @@
 #include <QList>
 #include <QUrl>
 
-struct mirrorFilter
+struct MirrorFilter
 {
     QStringList countryList;
     QStringList protocolList;
@@ -44,28 +44,22 @@ class MirrorManager : public QObject
         void getMirrorList();
         void getCountryList();
 
-        QList<mirror> filterMirrorList(mirrorFilter filter);
+        QList<Mirror> filterMirrorList(MirrorFilter filter);
 
     signals:
-        void mirrorListReady(QList<mirror> mirrorList);
+        void mirrorListReady(QList<Mirror> mirrorList);
         void countryListReady(QList<Country> countryList);
 
     private slots:
-        void parseMirrorList(QUrl url);
-        void parseCountryList(QUrl url);
+        void getParsedData();
 
     private:
         Network theNetwork;
         MirrorParser theParser;
-        QList<mirror> mirrorListAll;
-        QList<mirror> mirrorListIPv4;
-        QList<mirror> mirrorListIPv6;
-        QList<mirror> mirrorListStatus;
-        QList<QUrl> urls;
+        QList<Mirror> mirrorListAll;
+        QUrl url;
         bool gettingMirrorList;
         bool gettingCountryList;
-        void getNextMirrorList(QUrl url);
-        void processMirrorLists();
 };
 
 #endif

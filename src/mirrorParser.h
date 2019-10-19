@@ -22,20 +22,26 @@
 #include <QList>
 #include <QString>
 #include <QStringList>
+#include <QJsonArray>
 
 class MirrorParser
 {
     private:
-        QString rawData;
-        QList<mirror> mirrorList;
+        QJsonArray jsonMirrorArray;
+
+        QList<Mirror> mirrorList;
         QList<Country> countryList;
+        
         void parseMirrorList();
         void parseCountries();
+        
         QPixmap getFlag(QString country);
+        QString getCountry(QString country);
 
     public:
-        void setMirrorList(QString data);
-        QList<mirror> getMirrorList();
+        void setRawData(QByteArray data);
+        
+        QList<Mirror> getMirrorList();
         QList<Country> getCountryList();
 };
 

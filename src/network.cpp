@@ -31,12 +31,12 @@ void Network::getRequest(QUrl url)
 
 void Network::readData(QNetworkReply *reply)
 {
-    data = QString(reply->readAll());
+    data = reply->readAll();
     reply->deleteLater();
-    emit dataRead(reply->url());
+    emit dataRead();
 }
 
-QString Network::getData() const
+QByteArray Network::getData() const
 {
     return data;
 }

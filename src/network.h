@@ -31,17 +31,17 @@ class Network : public QObject
         explicit Network(QObject *parent = 0);
         virtual ~Network();
         void getRequest(QUrl url);
-        QString getData() const;
+        QByteArray getData() const;
 
     signals:
-        void dataRead(QUrl url);
+        void dataRead();
 
     private slots:
         void readData(QNetworkReply *reply);
 
     private:
         QNetworkAccessManager manager;
-        QString data;
+        QByteArray data;
 };
 
 #endif

@@ -19,98 +19,42 @@
 
 MirrorManager::MirrorManager()
 {
-    urls.clear();
-    
-    // Urls to query for mirrors and their supported IP versions and status
-    urls.append(QUrl("https://www.archlinux.org/mirrorlist/all/"));
-    urls.append(QUrl("https://www.archlinux.org/mirrorlist/?country=all&ip_version=4"));
-    urls.append(QUrl("https://www.archlinux.org/mirrorlist/?country=all&ip_version=6"));
-    urls.append(QUrl("https://www.archlinux.org/mirrorlist/?country=all&use_mirror_status=on"));
+    // Url to query for mirrors (JSON format) 
+    url = "https://www.archlinux.org/mirrors/status/json/";
 
-    connect(&theNetwork, &Network::dataRead, this, &MirrorManager::parseMirrorList);
-    connect(&theNetwork, &Network::dataRead, this, &MirrorManager::parseCountryList);
+    connect(&theNetwork, &Network::dataRead, this, &MirrorManager::getParsedData);
 }
 
 // Parse fetched mirror list according to Url
-void MirrorManager::parseMirrorList(QUrl url)
+void MirrorManager::getParsedData()
 {
+    theParser.setRawData(theNetwork.getData());
+
     if (gettingMirrorList) {
-        theParser.setMirrorList(theNetwork.getData());
-
-        if (url == urls.at(0)) {
-            mirrorListAll = theParser.getMirrorList();
-            getNextMirrorList(urls.at(1));
-        } else if (url == urls.at(1)) {
-            mirrorListIPv4 = theParser.getMirrorList();
-            getNextMirrorList(urls.at(2));
-        } else if (url == urls.at(2)) {
-            mirrorListIPv6 = theParser.getMirrorList();
-            getNextMirrorList(urls.at(3));
-        } else if (url == urls.at(3)) {
-            mirrorListStatus = theParser.getMirrorList();
-            gettingMirrorList = false;
-            processMirrorLists();
-        }
+        mirrorListAll = theParser.getMirrorList();
+        emit mirrorListReady(mirrorListAll);
+        gettingMirrorList = false;
     }
-}
 
-void MirrorManager::getNextMirrorList(QUrl url)
-{
-    theNetwork.getRequest(url);
-}
-
-void MirrorManager::getMirrorList()
-{
-    gettingMirrorList = true;
-    getNextMirrorList(urls.at(0));
-}
-
-// Set mirror IP versions and status
-void MirrorManager::processMirrorLists()
-{
-    for (int i = 0; i < mirrorListAll.size(); i++) {
-        for (int j = 0; j < mirrorListIPv4.size(); j++) {
-            if (mirrorListIPv4.at(j).url == mirrorListAll.at(i).url) {
-                mirrorListAll[i].ipv4 = true;
-                mirrorListIPv4.removeAt(j);
-                break;
-            }
-        }
-        for (int j = 0; j < mirrorListIPv6.size(); j++) {
-            if (mirrorListIPv6.at(j).url == mirrorListAll.at(i).url) {
-                mirrorListAll[i].ipv6 = true;
-                mirrorListIPv6.removeAt(j);
-                break;
-            }
-        }
-        for (int j = 0; j < mirrorListStatus.size(); j++) {
-            if (mirrorListStatus.at(j).url == mirrorListAll.at(i).url) {
-                mirrorListAll[i].status = true;
-                mirrorListStatus.removeAt(j);
-                break;
-            }
-        }
-    }
-    
-    emit mirrorListReady(mirrorListAll);
-}
-
-void MirrorManager::getCountryList()
-{
-    gettingCountryList = true;
-    theNetwork.getRequest(urls.at(0));
-}
-
-void MirrorManager::parseCountryList(QUrl url)
-{
     if (gettingCountryList) {
-        theParser.setMirrorList(theNetwork.getData());
         emit countryListReady(theParser.getCountryList());
         gettingCountryList = false;
     }
 }
 
-QList<mirror> MirrorManager::filterMirrorList(mirrorFilter filter)
+void MirrorManager::getMirrorList()
+{
+    gettingMirrorList = true;
+    theNetwork.getRequest(url);
+}
+
+void MirrorManager::getCountryList()
+{
+    gettingCountryList = true;
+    theNetwork.getRequest(url);
+}
+
+QList<Mirror> MirrorManager::filterMirrorList(MirrorFilter filter)
 {
     // Don't filter if least restrictive filter set, just return all mirrors
     if (filter.countryList.isEmpty() &&
@@ -123,7 +67,7 @@ QList<mirror> MirrorManager::filterMirrorList(mirrorFilter filter)
             return mirrorListAll;
     }
 
-    QList<mirror> filteredMirrorList;
+    QList<Mirror> filteredMirrorList;
 
     // Do the filtering
     for (int i = 0; i < mirrorListAll.size(); i++) {

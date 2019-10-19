@@ -41,7 +41,7 @@ void MirrorModel::getMirrorList()
     theMirrorManager.getMirrorList();
 }
 
-void MirrorModel::setMirrorList(QList<mirror> ml)
+void MirrorModel::setMirrorList(QList<Mirror> ml)
 {
     beginResetModel();
     mirrorList = ml;
@@ -222,7 +222,7 @@ void MirrorModel::readRankedMirrorList(int exitCode, QProcess::ExitStatus exitSt
 
         QStringList urls = output.split("\n");
 
-        QList<mirror> rankedMirrorList;
+        QList<Mirror> rankedMirrorList;
 
         for (int i = 0; i < urls.size(); i++) {
             for (int j = 0; j < mirrorList.size(); j++) {
