@@ -42,11 +42,12 @@ class MainWindow : public QWidget
         void affectWholeRow(const QItemSelection &selected, const QItemSelection &deselected);
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
         void showAllMirrors();
-        void filterMirrorListByCountry(const QItemSelection &selected, const QItemSelection &deselected);
-        void httpCB(int state);
-        void httpsCB(int state);
-        void ipv4CB(int state);
-        void ipv6CB(int state);
+        void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
+        void filterByHttp(int state);
+        void filterByHttps(int state);
+        void filterByRsync(int state);
+        void filterByIPv4(int state);
+        void filterByIPv6(int state);
         void statusOKCB(int state);
         void statusKOCB(int state);
         void rankMirrorList();
@@ -82,6 +83,7 @@ class MainWindow : public QWidget
 
         QCheckBox *httpCheckBox;
         QCheckBox *httpsCheckBox;
+        QCheckBox *rsyncCheckBox;
         QCheckBox *ipv4CheckBox;
         QCheckBox *ipv6CheckBox;
         QCheckBox *statusOKCheckBox;

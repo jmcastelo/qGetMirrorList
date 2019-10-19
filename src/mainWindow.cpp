@@ -105,11 +105,12 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::affectWholeRow);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
-    connect(selectionModelListView, &QItemSelectionModel::selectionChanged, this, &MainWindow::filterMirrorListByCountry); 
-    connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::httpCB);
-    connect(httpsCheckBox, &QCheckBox::stateChanged, this, &MainWindow::httpsCB);
-    connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::ipv4CB);
-    connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::ipv6CB);
+    connect(selectionModelListView, &QItemSelectionModel::selectionChanged, this, &MainWindow::filterByCountry); 
+    connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttp);
+    connect(httpsCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttps);
+    connect(rsyncCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByRsync);
+    connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
+    connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
     connect(statusOKCheckBox, &QCheckBox::stateChanged, this, &MainWindow::statusOKCB);
     connect(statusKOCheckBox, &QCheckBox::stateChanged, this, &MainWindow::statusKOCB);
     connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
@@ -166,17 +167,21 @@ void MainWindow::createMirrorActionsGroubBox()
 
     httpCheckBox = new QCheckBox("http", this);
     httpsCheckBox = new QCheckBox("https", this);
-    
+    rsyncCheckBox = new QCheckBox("rsync", this);
+
     httpCheckBox->setCheckState(Qt::Checked);
     httpsCheckBox->setCheckState(Qt::Checked);
+    rsyncCheckBox->setCheckState(Qt::Checked);
 
     httpCheckBox->setDisabled(true);
     httpsCheckBox->setDisabled(true);
+    rsyncCheckBox->setDisabled(true);
 
     QHBoxLayout *protocolsLayout = new QHBoxLayout;
 
     protocolsLayout->addWidget(httpCheckBox);
     protocolsLayout->addWidget(httpsCheckBox);
+    protocolsLayout->addWidget(rsyncCheckBox);
 
     protocolsGroupBox->setLayout(protocolsLayout);
 
@@ -264,6 +269,9 @@ void MainWindow::enableWidgets()
     if (!httpsCheckBox->isEnabled()) {
         httpsCheckBox->setEnabled(true);
     }
+    if (!rsyncCheckBox->isEnabled()) {
+        rsyncCheckBox->setEnabled(true);
+    }
     if (!ipv4CheckBox->isEnabled()) {
         ipv4CheckBox->setEnabled(true);
     }
@@ -321,7 +329,7 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
     }
 }
 
-void MainWindow::filterMirrorListByCountry(const QItemSelection &selected, const QItemSelection &deselected)
+void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QModelIndexList items = selected.indexes();
 
@@ -338,10 +346,12 @@ void MainWindow::filterMirrorListByCountry(const QItemSelection &selected, const
     mirrorModel->filterMirrorList();
 }
 
-void MainWindow::httpCB(int state)
+void MainWindow::filterByHttp(int state)
 {
-    if (state == Qt::Unchecked && httpsCheckBox->checkState() == Qt::Unchecked) {
-        httpCheckBox->setCheckState(Qt::Checked);
+    if (state == Qt::Unchecked &&
+        httpsCheckBox->checkState() == Qt::Unchecked &&
+        rsyncCheckBox->checkState() == Qt::Unchecked) {
+            httpCheckBox->setCheckState(Qt::Checked);
     } else {
         if (state == Qt::Checked) {
             mirrorModel->filter.protocolList.append("http");
@@ -352,10 +362,12 @@ void MainWindow::httpCB(int state)
     }
 }
 
-void MainWindow::httpsCB(int state)
+void MainWindow::filterByHttps(int state)
 {
-    if (state == Qt::Unchecked && httpCheckBox->checkState() == Qt::Unchecked) {
-        httpsCheckBox->setCheckState(Qt::Checked);
+    if (state == Qt::Unchecked &&
+        httpCheckBox->checkState() == Qt::Unchecked &&
+        rsyncCheckBox->checkState() == Qt::Unchecked) {
+            httpsCheckBox->setCheckState(Qt::Checked);
     } else {
         if (state == Qt::Checked) {
             mirrorModel->filter.protocolList.append("https");
@@ -366,7 +378,23 @@ void MainWindow::httpsCB(int state)
     }
 }
 
-void MainWindow::ipv4CB(int state)
+void MainWindow::filterByRsync(int state)
+{
+    if (state == Qt::Unchecked &&
+        httpCheckBox->checkState() == Qt::Unchecked &&
+        httpsCheckBox->checkState() == Qt::Unchecked) {
+            rsyncCheckBox->setCheckState(Qt::Checked);
+    } else {
+        if (state == Qt::Checked) {
+            mirrorModel->filter.protocolList.append("rsync");
+        } else {
+            mirrorModel->filter.protocolList.removeOne("rsync");
+        }
+        mirrorModel->filterMirrorList();
+    }
+}
+
+void MainWindow::filterByIPv4(int state)
 {
     if (state == Qt::Unchecked && ipv6CheckBox->checkState() == Qt::Unchecked) {
         ipv4CheckBox->setCheckState(Qt::Checked);
@@ -376,7 +404,7 @@ void MainWindow::ipv4CB(int state)
     }
 }
 
-void MainWindow::ipv6CB(int state)
+void MainWindow::filterByIPv6(int state)
 {
     if (state == Qt::Unchecked && ipv4CheckBox->checkState() == Qt::Unchecked) {
         ipv6CheckBox->setCheckState(Qt::Checked);

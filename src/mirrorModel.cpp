@@ -22,6 +22,7 @@ MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
     // Set least restrictive filter
     filter.protocolList.append("http");
     filter.protocolList.append("https");
+    filter.protocolList.append("rsync");
     filter.ipv4 = 1;
     filter.ipv6 = 1;
     filter.statusOK = true;

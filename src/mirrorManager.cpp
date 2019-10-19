@@ -60,6 +60,7 @@ QList<Mirror> MirrorManager::filterMirrorList(MirrorFilter filter)
     if (filter.countryList.isEmpty() &&
         filter.protocolList.contains("http") &&
         filter.protocolList.contains("https") &&
+        filter.protocolList.contains("rsync") &&
         filter.ipv4 == 1 &&
         filter.ipv6 == 1 &&
         filter.statusOK &&
