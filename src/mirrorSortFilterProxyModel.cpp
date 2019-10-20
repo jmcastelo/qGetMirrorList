@@ -15,6 +15,8 @@ bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelI
     } else if (leftData.type() == QVariant::Double) {
         return leftData.toDouble() < rightData.toDouble();
     }
+
+    return false;
 }
 
 QVariant MirrorSortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
