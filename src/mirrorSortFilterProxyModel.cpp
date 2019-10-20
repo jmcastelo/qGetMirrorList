@@ -18,7 +18,26 @@
 #include "mirrorSortFilterProxyModel.h"
 #include <QDateTime>
 
-MirrorSortFilterProxyModel::MirrorSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent){}
+MirrorSortFilterProxyModel::MirrorSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
+{
+    // Set least restrictive filter
+    filter.protocolList.append("http");
+    filter.protocolList.append("https");
+    filter.protocolList.append("rsync");
+    filter.active = 1;
+    filter.isos = 1;
+    filter.ipv4 = 1;
+    filter.ipv6 = 1;
+}
+
+QVariant MirrorSortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
+        return QStringLiteral("%1").arg(section + 1);
+    }
+
+    return sourceModel()->headerData(section, orientation, role);
+}
 
 bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
@@ -36,11 +55,101 @@ bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelI
     return false;
 }
 
-QVariant MirrorSortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
-        return QStringLiteral("%1").arg(section + 1);
+    QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent);
+    QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent);
+    QModelIndex index6 = sourceModel()->index(sourceRow, 6, sourceParent);
+    QModelIndex index7 = sourceModel()->index(sourceRow, 7, sourceParent);
+    QModelIndex index8 = sourceModel()->index(sourceRow, 8, sourceParent);
+    QModelIndex index9 = sourceModel()->index(sourceRow, 9, sourceParent);
+
+    QString country = sourceModel()->data(index1).toString();
+    QString protocol = sourceModel()->data(index2).toString();
+    QString active = sourceModel()->data(index8).toString();
+    QString isos = sourceModel()->data(index9).toString();
+    QString ipv4 = sourceModel()->data(index6).toString();
+    QString ipv6 = sourceModel()->data(index7).toString();
+
+    if ((filter.countryList.isEmpty() ||
+        filter.countryList.contains(country)) &&
+        filter.protocolList.contains(protocol) &&
+        (filter.active == 1 ||
+        (filter.active == 2 && active == "Yes") ||
+        (filter.active == 0 && active == "No")) &&
+        (filter.isos == 1 ||
+        (filter.isos == 2 && isos == "Yes") ||
+        (filter.isos == 0 && isos == "No")) &&
+        (filter.ipv4 == 1 ||
+        (filter.ipv4 == 2 && ipv4 == "Yes") ||
+        (filter.ipv4 == 0 && ipv4 == "No")) &&
+        (filter.ipv6 == 1 ||
+        (filter.ipv6 == 2 && ipv6 == "Yes") ||
+        (filter.ipv6 == 0 && ipv6 == "No"))) {
+            return true;
     }
 
-    return sourceModel()->headerData(section, orientation, role);
+    return false;
+}
+
+void MirrorSortFilterProxyModel::appendCountryFilter(QString country)
+{
+    filter.countryList.append(country);
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::removeCountryFilter(QString country)
+{
+    filter.countryList.removeOne(country);
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::appendProtocolFilter(QString protocol)
+{
+    filter.protocolList.append(protocol);
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::removeProtocolFilter(QString protocol)
+{
+    filter.protocolList.removeOne(protocol);
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::setActiveFilter(int active)
+{
+    filter.active = active;
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::setIsosFilter(int isos)
+{
+    filter.isos = isos;
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::setIPv4Filter(int ipv4)
+{
+    filter.ipv4 = ipv4;
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::setIPv6Filter(int ipv6)
+{
+    filter.ipv6 = ipv6;
+    invalidateFilter();
+}
+
+void MirrorSortFilterProxyModel::setLeastRestrictiveFilter()
+{
+    filter.countryList.clear();
+    filter.protocolList.append("http");
+    filter.protocolList.append("https");
+    filter.protocolList.append("rsync");
+    filter.active = 1;
+    filter.isos = 1;
+    filter.ipv4 = 1;
+    filter.ipv6 = 1;
+
+    invalidateFilter();
 }

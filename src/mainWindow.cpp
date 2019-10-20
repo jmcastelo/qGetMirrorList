@@ -24,7 +24,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
-    // Model and table view associated with the mirrors
+    // Model associated with the mirrors
     mirrorModel = new MirrorModel(this);
 
     // Mirror sort and filter proxy model
@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     mirrorProxyModel->setSourceModel(mirrorModel);
     mirrorProxyModel->setDynamicSortFilter(true);
 
+    // Table view associated with mirror model through proxy
     tableView = new QTableView;
     tableView->setModel(mirrorProxyModel);
     tableView->setSelectionMode(QAbstractItemView::MultiSelection);
@@ -471,16 +472,14 @@ void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSele
     QModelIndexList items = selected.indexes();
 
     for (const QModelIndex &index : qAsConst(items)) {
-        mirrorModel->filter.countryList.append(index.data().toString());
+        mirrorProxyModel->appendCountryFilter(index.data().toString());
     }
 
     items = deselected.indexes();
 
     for (const QModelIndex &index : qAsConst(items)) {
-        mirrorModel->filter.countryList.removeOne(index.data().toString());
+        mirrorProxyModel->removeCountryFilter(index.data().toString());
     }
-
-    mirrorModel->filterMirrorList();
 }
 
 void MainWindow::filterByHttp(int state)
@@ -491,11 +490,10 @@ void MainWindow::filterByHttp(int state)
             httpCheckBox->setCheckState(Qt::Checked);
     } else {
         if (state == Qt::Checked) {
-            mirrorModel->filter.protocolList.append("http");
+            mirrorProxyModel->appendProtocolFilter("http");
         } else {
-            mirrorModel->filter.protocolList.removeOne("http");
+            mirrorProxyModel->removeProtocolFilter("http");
         }
-        mirrorModel->filterMirrorList();
     }
 }
 
@@ -507,11 +505,10 @@ void MainWindow::filterByHttps(int state)
             httpsCheckBox->setCheckState(Qt::Checked);
     } else {
         if (state == Qt::Checked) {
-            mirrorModel->filter.protocolList.append("https");
+            mirrorProxyModel->appendProtocolFilter("https");
         } else {
-            mirrorModel->filter.protocolList.removeOne("https");
+            mirrorProxyModel->removeProtocolFilter("https");
         }
-        mirrorModel->filterMirrorList();
     }
 }
 
@@ -523,24 +520,21 @@ void MainWindow::filterByRsync(int state)
             rsyncCheckBox->setCheckState(Qt::Checked);
     } else {
         if (state == Qt::Checked) {
-            mirrorModel->filter.protocolList.append("rsync");
+            mirrorProxyModel->appendProtocolFilter("rsync");
         } else {
-            mirrorModel->filter.protocolList.removeOne("rsync");
+            mirrorProxyModel->removeProtocolFilter("rsync");
         }
-        mirrorModel->filterMirrorList();
     }
 }
 
 void MainWindow::filterByActive(int state)
 {
-    mirrorModel->filter.active = state;
-    mirrorModel->filterMirrorList();
+    mirrorProxyModel->setActiveFilter(state);
 }
 
 void MainWindow::filterByIsos(int state)
 {
-    mirrorModel->filter.isos = state;
-    mirrorModel->filterMirrorList();
+    mirrorProxyModel->setIsosFilter(state);
 }
 
 void MainWindow::filterByIPv4(int state)
@@ -548,8 +542,7 @@ void MainWindow::filterByIPv4(int state)
     if (state == Qt::Unchecked && ipv6CheckBox->checkState() == Qt::Unchecked) {
         ipv4CheckBox->setCheckState(Qt::Checked);
     } else {
-        mirrorModel->filter.ipv4 = state;
-        mirrorModel->filterMirrorList();
+        mirrorProxyModel->setIPv4Filter(state);
     }
 }
 
@@ -558,25 +551,13 @@ void MainWindow::filterByIPv6(int state)
     if (state == Qt::Unchecked && ipv4CheckBox->checkState() == Qt::Unchecked) {
         ipv6CheckBox->setCheckState(Qt::Checked);
     } else {
-        mirrorModel->filter.ipv6 = state;
-        mirrorModel->filterMirrorList();
+        mirrorProxyModel->setIPv6Filter(state);
     }
 }
 
 void MainWindow::showAllMirrors()
 {
-    // Set least restrictive filters and filter mirror list
-    mirrorModel->filter.countryList.clear();
-    mirrorModel->filter.protocolList.clear();
-    mirrorModel->filter.protocolList.append("http");
-    mirrorModel->filter.protocolList.append("https");
-    mirrorModel->filter.protocolList.append("rsync");
-    mirrorModel->filter.active = 1;
-    mirrorModel->filter.isos = 1;
-    mirrorModel->filter.ipv4 = 1;
-    mirrorModel->filter.ipv6 = 1;
-
-    mirrorModel->filterMirrorList();
+    mirrorProxyModel->setLeastRestrictiveFilter();
 
     // Set filter checkboxes accordingly
     httpCheckBox->setCheckState(Qt::Checked);

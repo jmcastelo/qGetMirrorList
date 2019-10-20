@@ -24,16 +24,6 @@
 #include <QList>
 #include <QUrl>
 
-struct MirrorFilter
-{
-    QStringList countryList;
-    QStringList protocolList;
-    int active;
-    int isos;
-    int ipv4;
-    int ipv6;
-};
-
 class MirrorManager : public QObject
 {
     Q_OBJECT
@@ -43,8 +33,6 @@ class MirrorManager : public QObject
         
         void getMirrorList();
         void getCountryList();
-
-        QList<Mirror> filterMirrorList(MirrorFilter filter);
 
     signals:
         void mirrorListReady(QList<Mirror> mirrorList);

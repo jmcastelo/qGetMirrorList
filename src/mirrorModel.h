@@ -37,8 +37,6 @@ class MirrorModel : public QAbstractTableModel
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         
-        MirrorFilter filter;
-        void filterMirrorList();
         void selectMirror(int index);
         void deselectMirror(int index);
         void rankMirrorList();

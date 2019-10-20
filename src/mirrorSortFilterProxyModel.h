@@ -20,6 +20,16 @@
 
 #include <QSortFilterProxyModel>
 
+struct MirrorFilter
+{
+    QStringList countryList;
+    QStringList protocolList;
+    int active;
+    int isos;
+    int ipv4;
+    int ipv6;
+};
+
 class MirrorSortFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
@@ -29,8 +39,22 @@ class MirrorSortFilterProxyModel : public QSortFilterProxyModel
 
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+        MirrorFilter filter;
+
+        void appendCountryFilter(QString country);
+        void removeCountryFilter(QString country);
+        void appendProtocolFilter(QString protocol);
+        void removeProtocolFilter(QString protocol);
+        void setActiveFilter(int active);
+        void setIsosFilter(int isos);
+        void setIPv4Filter(int ipv4);
+        void setIPv6Filter(int ipv6);
+        
+        void setLeastRestrictiveFilter();
+
     protected:
         bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+        bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 };
 
 #endif

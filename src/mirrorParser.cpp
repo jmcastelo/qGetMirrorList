@@ -43,9 +43,9 @@ void MirrorParser::parseMirrorList()
         oneMirror.protocol = loopObject["protocol"].toString();
         oneMirror.last_sync = getLocalDateTime(loopObject["last_sync"].toString());
         oneMirror.completion_pct = 100*loopObject["completion_pct"].toDouble();
-        oneMirror.delay = loopObject["delay"].toInt();
-        oneMirror.duration_avg = loopObject["duration_avg"].toDouble();
-        oneMirror.duration_stddev = loopObject["duration_stddev"].toDouble();
+        //oneMirror.delay = loopObject["delay"].toInt();
+        //oneMirror.duration_avg = loopObject["duration_avg"].toDouble();
+        //oneMirror.duration_stddev = loopObject["duration_stddev"].toDouble();
         oneMirror.score = loopObject["score"].toDouble();
         oneMirror.active = loopObject["active"].toBool();
         oneMirror.country = getCountry(loopObject["country"].toString());

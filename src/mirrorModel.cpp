@@ -19,15 +19,6 @@
 
 MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
-    // Set least restrictive filter
-    filter.protocolList.append("http");
-    filter.protocolList.append("https");
-    filter.protocolList.append("rsync");
-    filter.active = 1;
-    filter.isos = 1;
-    filter.ipv4 = 1;
-    filter.ipv6 = 1;
-    
     // Connections
     connect(&theMirrorManager, &MirrorManager::mirrorListReady, this, &MirrorModel::setMirrorList);
     connect(&rankmirrors, &QProcess::started, this, &MirrorModel::rankingMirrors);
@@ -77,7 +68,6 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     QPixmap tick(":/images/icons/tick.png");
     QPixmap cross(":/images/icons/cross.png");
 
-    // For boolean columns, set tick and cross pixmaps
     if (role == Qt::DecorationRole) {
         if (col == 1) {
             return mirrorList.at(row).flag;
@@ -110,7 +100,6 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // Rest of columns
     if (role == Qt::DisplayRole) {
         if (col == 0) {
             return mirrorList.at(row).url;
@@ -124,6 +113,14 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
             return QString("%1").arg(mirrorList.at(row).score, 0, 'f', 2).toDouble();
         } else if (col == 5) {
             return mirrorList.at(row).last_sync;
+        } else if (col == 6) {
+            return mirrorList.at(row).ipv4 ? QString("Yes") : QString("No");
+        } else if (col == 7) {
+            return mirrorList.at(row).ipv6 ? QString("Yes") : QString("No");
+        } else if (col == 8) {
+            return mirrorList.at(row).active ? QString("Yes") : QString("No");
+        } else if (col == 9) {
+            return mirrorList.at(row).isos ? QString("Yes") : QString("No");
         } else {
             return QVariant();
         }
@@ -165,13 +162,6 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
     }
 
     return QVariant();
-}
-
-void MirrorModel::filterMirrorList()
-{
-    beginResetModel();
-    mirrorList = theMirrorManager.filterMirrorList(filter);
-    endResetModel();
 }
 
 void MirrorModel::selectMirror(int index)

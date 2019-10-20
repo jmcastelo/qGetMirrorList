@@ -28,9 +28,9 @@ struct Mirror
     QString protocol;
     QDateTime last_sync;
     double completion_pct;
-    int delay;
-    double duration_avg;
-    double duration_stddev;
+    //int delay;
+    //double duration_avg;
+    //double duration_stddev;
     double score;
     bool active;
     QString country;
