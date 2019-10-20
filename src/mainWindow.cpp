@@ -58,11 +58,17 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     createMirrorActionsGroubBox();
     createMirrorTableGroupBox();
+    createMirrorColumnSelectGroupBox();
+
+    QVBoxLayout *vLayout = new QVBoxLayout;
+
+    vLayout->addWidget(mirrorColumnSelectGroupBox);
+    vLayout->addWidget(mirrorTableGroupBox);
 
     QGridLayout *mainLayout = new QGridLayout(this);
 
     mainLayout->addWidget(mirrorActionsGroupBox, 0, 0);
-    mainLayout->addWidget(mirrorTableGroupBox, 0, 1);
+    mainLayout->addLayout(vLayout, 0, 1);
 
     mainLayout->setColumnStretch(0, 1);
     mainLayout->setColumnStretch(1, 10);
@@ -76,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     setWindowIcon(QIcon(pixmap));
 
-    setGeometry(50, 50, 1100, 700);
+    setGeometry(50, 50, 1400, 700);
 
     // File dialog
     saveMirrorListDialog = new QFileDialog(this);
@@ -103,7 +109,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     waitForRankingDialog->setLayout(waitLayout);
 
-    // Connections    
+    // Connections: actions 
     connect(getMirrorListButton, &QPushButton::clicked, mirrorModel, &MirrorModel::getMirrorList);
     connect(getMirrorListButton, &QPushButton::clicked, countryModel, &CountryModel::getCountryList);
     connect(saveMirrorListButton, &QPushButton::clicked, this, &MainWindow::openSaveDialog);
@@ -113,6 +119,18 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(showAllMirrorsButton, &QPushButton::clicked, this, &MainWindow::showAllMirrors);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
+    // Connections: columns
+    connect(urlColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setUrlColumn);
+    connect(countryColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setCountryColumn);
+    connect(protocolColChechBox, &QCheckBox::stateChanged, this, &MainWindow::setProtocolColumn);
+    connect(completionColChechBox, &QCheckBox::stateChanged, this, &MainWindow::setCompletionColumn);
+    connect(scoreColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setScoreColumn);
+    connect(syncColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setSyncColumn);
+    connect(ipv4ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv4Column);
+    connect(ipv6ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv6Column);
+    connect(activeColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setActiveColumn);
+    connect(isosColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIsosColumn);
+    // Connections: filters
     connect(selectionModelListView, &QItemSelectionModel::selectionChanged, this, &MainWindow::filterByCountry); 
     connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttp);
     connect(httpsCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttps);
@@ -121,11 +139,13 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(isosCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIsos);
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
+    // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
     connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
     connect(mirrorModel, &MirrorModel::rankingMirrorsEnd, waitForRankingDialog, &QDialog::done);
     connect(mirrorModel, &MirrorModel::rankingMirrorsCancelled, waitForRankingDialog, &QDialog::done);
     connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankingMirrorList); 
+    // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
@@ -256,12 +276,51 @@ void MainWindow::createMirrorActionsGroubBox()
 
 void MainWindow::createMirrorTableGroupBox()
 {
-    mirrorTableGroupBox = new QGroupBox(tr("Mirrors"));
-    
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(tableView);
-
+    
+    mirrorTableGroupBox = new QGroupBox("Mirrors");
     mirrorTableGroupBox->setLayout(layout);
+}
+
+void MainWindow::createMirrorColumnSelectGroupBox()
+{
+    urlColCheckBox = new QCheckBox("URL", this);
+    countryColCheckBox = new QCheckBox("Country", this);
+    protocolColChechBox = new QCheckBox("Protocol", this);
+    completionColChechBox = new QCheckBox("Completion %", this);
+    scoreColCheckBox = new QCheckBox("Score", this);
+    syncColCheckBox = new QCheckBox("Last sync", this);
+    ipv4ColCheckBox = new QCheckBox("IPv4", this);
+    ipv6ColCheckBox = new QCheckBox("IPv6", this);
+    activeColCheckBox = new QCheckBox("Active", this);
+    isosColCheckBox = new QCheckBox("ISOs", this);
+
+    urlColCheckBox->setCheckState(Qt::Checked);
+    countryColCheckBox->setCheckState(Qt::Checked);
+    protocolColChechBox->setCheckState(Qt::Checked);
+    completionColChechBox->setCheckState(Qt::Checked);
+    scoreColCheckBox->setCheckState(Qt::Checked);
+    syncColCheckBox->setCheckState(Qt::Checked);
+    ipv4ColCheckBox->setCheckState(Qt::Checked);
+    ipv6ColCheckBox->setCheckState(Qt::Checked);
+    activeColCheckBox->setCheckState(Qt::Checked);
+    isosColCheckBox->setCheckState(Qt::Checked);
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(urlColCheckBox);
+    layout->addWidget(countryColCheckBox);
+    layout->addWidget(protocolColChechBox);
+    layout->addWidget(completionColChechBox);
+    layout->addWidget(scoreColCheckBox);
+    layout->addWidget(syncColCheckBox);
+    layout->addWidget(ipv4ColCheckBox);
+    layout->addWidget(ipv6ColCheckBox);
+    layout->addWidget(activeColCheckBox);
+    layout->addWidget(isosColCheckBox);
+
+    mirrorColumnSelectGroupBox = new QGroupBox("Columns");
+    mirrorColumnSelectGroupBox->setLayout(layout);
 }
 
 // Once user gets mirror list, enable buttons and checkboxes
@@ -314,6 +373,96 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
 
     for (const QModelIndex &index : qAsConst(items)) {
         mirrorModel->deselectMirror(index.row());
+    }
+}
+
+void MainWindow::setUrlColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(0, true);
+    } else {
+        tableView->setColumnHidden(0, false);
+    }
+}
+
+void MainWindow::setCountryColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(1, true);
+    } else {
+        tableView->setColumnHidden(1, false);
+    }
+}
+
+void MainWindow::setProtocolColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(2, true);
+    } else {
+        tableView->setColumnHidden(2, false);
+    }
+}
+
+void MainWindow::setCompletionColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(3, true);
+    } else {
+        tableView->setColumnHidden(3, false);
+    }
+}
+
+void MainWindow::setScoreColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(4, true);
+    } else {
+        tableView->setColumnHidden(4, false);
+    }
+}
+
+void MainWindow::setSyncColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(5, true);
+    } else {
+        tableView->setColumnHidden(5, false);
+    }
+}
+
+void MainWindow::setIPv4Column(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(6, true);
+    } else {
+        tableView->setColumnHidden(6, false);
+    }
+}
+
+void MainWindow::setIPv6Column(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(7, true);
+    } else {
+        tableView->setColumnHidden(7, false);
+    }
+}
+
+void MainWindow::setActiveColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(8, true);
+    } else {
+        tableView->setColumnHidden(8, false);
+    }
+}
+
+void MainWindow::setIsosColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(9, true);
+    } else {
+        tableView->setColumnHidden(9, false);
     }
 }
 

@@ -44,6 +44,17 @@ class MainWindow : public QWidget
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
         void showAllMirrors();
 
+        void setUrlColumn(int state);
+        void setCountryColumn(int state);
+        void setProtocolColumn(int state);
+        void setCompletionColumn(int state);
+        void setScoreColumn(int state);
+        void setSyncColumn(int state);
+        void setIPv4Column(int state);
+        void setIPv6Column(int state);
+        void setActiveColumn(int state);
+        void setIsosColumn(int state);
+
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
         void filterByHttp(int state);
         void filterByHttps(int state);
@@ -77,9 +88,11 @@ class MainWindow : public QWidget
 
         void createMirrorActionsGroubBox();
         void createMirrorTableGroupBox();
+        void createMirrorColumnSelectGroupBox();
 
         QGroupBox *mirrorActionsGroupBox;
         QGroupBox *mirrorTableGroupBox;
+        QGroupBox *mirrorColumnSelectGroupBox;
         
         QPushButton *getMirrorListButton;
         QPushButton *saveMirrorListButton;
@@ -95,6 +108,17 @@ class MainWindow : public QWidget
         QCheckBox *isosCheckBox;
         QCheckBox *ipv4CheckBox;
         QCheckBox *ipv6CheckBox;
+
+        QCheckBox *urlColCheckBox;
+        QCheckBox *countryColCheckBox;
+        QCheckBox *protocolColChechBox;
+        QCheckBox *completionColChechBox;
+        QCheckBox *scoreColCheckBox;
+        QCheckBox *syncColCheckBox;
+        QCheckBox *ipv4ColCheckBox;
+        QCheckBox *ipv6ColCheckBox;
+        QCheckBox *activeColCheckBox;
+        QCheckBox *isosColCheckBox;
 
         QFileDialog *saveMirrorListDialog;
         QDialog *waitForRankingDialog;
