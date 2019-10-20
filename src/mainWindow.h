@@ -20,6 +20,7 @@
 
 #include "mirrorModel.h"
 #include "countryModel.h"
+#include "mirrorSortFilterProxyModel.h"
 #include <QWidget>
 #include <QTableView>
 #include <QListView>
@@ -40,9 +41,7 @@ class MainWindow : public QWidget
     private slots:
         void enableWidgets();
         
-        void affectWholeRow(const QItemSelection &selected, const QItemSelection &deselected);
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
-        
         void showAllMirrors();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
@@ -69,6 +68,7 @@ class MainWindow : public QWidget
         MirrorModel *mirrorModel;
         QTableView *tableView;
         QItemSelectionModel *selectionModelTableView;
+        MirrorSortFilterProxyModel *mirrorProxyModel;
 
         CountryModel *countryModel;
         QListView *listView;

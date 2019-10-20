@@ -27,11 +27,20 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     // Model and table view associated with the mirrors
     mirrorModel = new MirrorModel(this);
 
+    // Mirror sort and filter proxy model
+    mirrorProxyModel = new MirrorSortFilterProxyModel(this);
+    mirrorProxyModel->setSourceModel(mirrorModel);
+    mirrorProxyModel->setDynamicSortFilter(true);
+
     tableView = new QTableView;
-    tableView->setModel(mirrorModel);
+    tableView->setModel(mirrorProxyModel);
     tableView->setSelectionMode(QAbstractItemView::MultiSelection);
+    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    tableView->setAlternatingRowColors(true);
+    tableView->setSortingEnabled(true);
+    tableView->sortByColumn(1, Qt::AscendingOrder);
 
     selectionModelTableView = tableView->selectionModel();
 
@@ -103,7 +112,6 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(updateMirrorListButton, &QPushButton::clicked, this, &MainWindow::updateMirrorList);
     connect(showAllMirrorsButton, &QPushButton::clicked, this, &MainWindow::showAllMirrors);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
-    connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::affectWholeRow);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
     connect(selectionModelListView, &QItemSelectionModel::selectionChanged, this, &MainWindow::filterByCountry); 
     connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttp);
@@ -292,34 +300,6 @@ void MainWindow::enableWidgets()
     if (!ipv6CheckBox->isEnabled()) {
         ipv6CheckBox->setEnabled(true);
     }
-}
-
-// When mirror table cell pressed, select whole row
-void MainWindow::affectWholeRow(const QItemSelection &selected, const QItemSelection &deselected)
-{
-    QModelIndex firstColumn, lastColumn;
-
-    QModelIndexList items = selected.indexes();
-
-    for (const QModelIndex &index : qAsConst(items)) {
-        firstColumn = mirrorModel->index(index.row(), 0, QModelIndex());
-        lastColumn = mirrorModel->index(index.row(), 5, QModelIndex());
-        
-        QItemSelection selection(firstColumn, lastColumn);
-        
-        selectionModelTableView->select(selection, QItemSelectionModel::Select);
-    }
-
-    items = deselected.indexes();
-
-    for (const QModelIndex &index : qAsConst(items)) {
-        firstColumn = mirrorModel->index(index.row(), 0, QModelIndex());
-        lastColumn = mirrorModel->index(index.row(), 5, QModelIndex());
-        
-        QItemSelection selection(firstColumn, lastColumn);
-        
-        selectionModelTableView->select(selection, QItemSelectionModel::Deselect);
-    }        
 }
 
 void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelection &deselected)
