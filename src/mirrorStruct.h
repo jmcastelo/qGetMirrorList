@@ -19,13 +19,14 @@
 #define MIRRORSTRUC_H
 
 #include <QString>
+#include <QDateTime>
 #include <QPixmap>
 
 struct Mirror
 {
     QString url;
     QString protocol;
-    QString last_sync;
+    QDateTime last_sync;
     double completion_pct;
     int delay;
     double duration_avg;

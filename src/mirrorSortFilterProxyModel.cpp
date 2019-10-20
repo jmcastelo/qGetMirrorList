@@ -1,4 +1,5 @@
 #include "mirrorSortFilterProxyModel.h"
+#include <QDateTime>
 
 MirrorSortFilterProxyModel::MirrorSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent){}
 
@@ -7,10 +8,13 @@ bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelI
     QVariant leftData = sourceModel()->data(left);
     QVariant rightData = sourceModel()->data(right);
 
-    QString leftString = leftData.toString();
-    QString rightString= rightData.toString();
-
-    return leftString.compare(rightString, Qt::CaseSensitive) < 0;
+    if (leftData.type() == QVariant::DateTime) {
+        return leftData.toDateTime() < rightData.toDateTime();
+    } else if (leftData.type() == QVariant::String) {
+        return leftData.toString().compare(rightData.toString(), Qt::CaseSensitive) < 0;
+    } else if (leftData.type() == QVariant::Double) {
+        return leftData.toDouble() < rightData.toDouble();
+    }
 }
 
 QVariant MirrorSortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const

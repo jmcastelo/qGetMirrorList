@@ -110,7 +110,7 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // For string columns, set corresponding strings
+    // Rest of columns
     if (role == Qt::DisplayRole) {
         if (col == 0) {
             return mirrorList.at(row).url;
@@ -119,9 +119,9 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         } else if (col == 2) {
             return mirrorList.at(row).protocol;
         } else if (col == 3) {
-            return QString("%1\%").arg(mirrorList.at(row).completion_pct, 0, 'f', 2);
+            return QString("%1").arg(mirrorList.at(row).completion_pct, 0, 'f', 2).toDouble();
         } else if (col == 4) {
-            return QString("%1").arg(mirrorList.at(row).score, 0, 'f', 2);
+            return QString("%1").arg(mirrorList.at(row).score, 0, 'f', 2).toDouble();
         } else if (col == 5) {
             return mirrorList.at(row).last_sync;
         } else {
@@ -146,7 +146,7 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
         } else if (section == 2) {
             return QString("Protocol");
         } else if (section == 3) {
-            return QString("Completion");
+            return QString("Completion %");
         } else if (section == 4) {
             return QString("Score");
         } else if (section == 5) {

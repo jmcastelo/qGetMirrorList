@@ -35,6 +35,7 @@ class MirrorParser
         void parseMirrorList();
         void parseCountries();
         
+        QDateTime getLocalDateTime(QString date);
         QPixmap getFlag(QString country);
         QString getCountry(QString country);
 
