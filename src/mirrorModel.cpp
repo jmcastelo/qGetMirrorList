@@ -58,7 +58,7 @@ int MirrorModel::rowCount(const QModelIndex &parent) const
 
 int MirrorModel::columnCount(const QModelIndex &parent) const
 {
-    return 8; 
+    return 10; 
 }
 
 QVariant MirrorModel::data(const QModelIndex &index, int role) const
@@ -77,29 +77,29 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     QPixmap tick(":/images/icons/tick.png");
     QPixmap cross(":/images/icons/cross.png");
 
-    // For IP versions and status columns, set tick and cross pixmaps
+    // For boolean columns, set tick and cross pixmaps
     if (role == Qt::DecorationRole) {
         if (col == 1) {
             return mirrorList.at(row).flag;
-        } else if (col == 4) {
+        } else if (col == 6) {
             if (mirrorList.at(row).ipv4) {
                 return tick; 
             } else {
                 return cross;
             }
-        } else if (col == 5) {
+        } else if (col == 7) {
             if (mirrorList.at(row).ipv6) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 6) {
+        } else if (col == 8) {
             if (mirrorList.at(row).active) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 7) {
+        } else if (col == 9) {
             if (mirrorList.at(row).isos) {
                 return tick;
             } else {
@@ -110,7 +110,7 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    // For Url, country and protocol columns, set corresponding strings
+    // For string columns, set corresponding strings
     if (role == Qt::DisplayRole) {
         if (col == 0) {
             return mirrorList.at(row).url;
@@ -120,6 +120,10 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
             return mirrorList.at(row).protocol;
         } else if (col == 3) {
             return QString("%1\%").arg(mirrorList.at(row).completion_pct, 0, 'f', 2);
+        } else if (col == 4) {
+            return QString("%1").arg(mirrorList.at(row).score, 0, 'f', 2);
+        } else if (col == 5) {
+            return mirrorList.at(row).last_sync;
         } else {
             return QVariant();
         }
@@ -144,12 +148,16 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
         } else if (section == 3) {
             return QString("Completion");
         } else if (section == 4) {
-            return QString("IPv4");
+            return QString("Score");
         } else if (section == 5) {
-            return QString("IPv6");
+            return QString("Last sync");
         } else if (section == 6) {
-            return QString("Active");
+            return QString("IPv4");
         } else if (section == 7) {
+            return QString("IPv6");
+        } else if (section == 8) {
+            return QString("Active");
+        } else if (section == 9) {
             return QString("ISOs");
         }
     } else if (orientation == Qt::Vertical) {
