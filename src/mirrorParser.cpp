@@ -36,6 +36,9 @@ void MirrorParser::parseMirrorList()
 {
     Mirror oneMirror;
 
+    oneMirror.selected = false;
+    oneMirror.speed = 0.0;
+
     for (const QJsonValue &value : jsonMirrorArray) {
         QJsonObject loopObject = value.toObject();
 
@@ -53,7 +56,6 @@ void MirrorParser::parseMirrorList()
         oneMirror.isos = loopObject["isos"].toBool();
         oneMirror.ipv4 = loopObject["ipv4"].toBool();
         oneMirror.ipv6 = loopObject["ipv6"].toBool();
-        oneMirror.selected = false;
         oneMirror.flag = getFlag(oneMirror.country_code);
 
         mirrorList.append(oneMirror);

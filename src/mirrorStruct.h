@@ -40,6 +40,7 @@ struct Mirror
     bool ipv6;
     bool selected;
     QPixmap flag;
+    double speed;
 };
 
 struct Country

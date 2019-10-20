@@ -126,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(protocolColChechBox, &QCheckBox::stateChanged, this, &MainWindow::setProtocolColumn);
     connect(completionColChechBox, &QCheckBox::stateChanged, this, &MainWindow::setCompletionColumn);
     connect(scoreColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setScoreColumn);
+    connect(speedColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setSpeedColumn);
     connect(syncColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setSyncColumn);
     connect(ipv4ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv4Column);
     connect(ipv6ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv6Column);
@@ -291,6 +292,7 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     protocolColChechBox = new QCheckBox("Protocol", this);
     completionColChechBox = new QCheckBox("Completion %", this);
     scoreColCheckBox = new QCheckBox("Score", this);
+    speedColCheckBox = new QCheckBox("Speed (KiB/s)", this);
     syncColCheckBox = new QCheckBox("Last sync", this);
     ipv4ColCheckBox = new QCheckBox("IPv4", this);
     ipv6ColCheckBox = new QCheckBox("IPv6", this);
@@ -302,6 +304,7 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     protocolColChechBox->setCheckState(Qt::Checked);
     completionColChechBox->setCheckState(Qt::Checked);
     scoreColCheckBox->setCheckState(Qt::Checked);
+    speedColCheckBox->setCheckState(Qt::Checked);
     syncColCheckBox->setCheckState(Qt::Checked);
     ipv4ColCheckBox->setCheckState(Qt::Checked);
     ipv6ColCheckBox->setCheckState(Qt::Checked);
@@ -314,6 +317,7 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     layout->addWidget(protocolColChechBox);
     layout->addWidget(completionColChechBox);
     layout->addWidget(scoreColCheckBox);
+    layout->addWidget(speedColCheckBox);
     layout->addWidget(syncColCheckBox);
     layout->addWidget(ipv4ColCheckBox);
     layout->addWidget(ipv6ColCheckBox);
@@ -422,7 +426,7 @@ void MainWindow::setScoreColumn(int state)
     }
 }
 
-void MainWindow::setSyncColumn(int state)
+void MainWindow::setSpeedColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(5, true);
@@ -431,7 +435,7 @@ void MainWindow::setSyncColumn(int state)
     }
 }
 
-void MainWindow::setIPv4Column(int state)
+void MainWindow::setSyncColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(6, true);
@@ -440,7 +444,7 @@ void MainWindow::setIPv4Column(int state)
     }
 }
 
-void MainWindow::setIPv6Column(int state)
+void MainWindow::setIPv4Column(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(7, true);
@@ -449,7 +453,7 @@ void MainWindow::setIPv6Column(int state)
     }
 }
 
-void MainWindow::setActiveColumn(int state)
+void MainWindow::setIPv6Column(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(8, true);
@@ -458,12 +462,21 @@ void MainWindow::setActiveColumn(int state)
     }
 }
 
-void MainWindow::setIsosColumn(int state)
+void MainWindow::setActiveColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(9, true);
     } else {
         tableView->setColumnHidden(9, false);
+    }
+}
+
+void MainWindow::setIsosColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(10, true);
+    } else {
+        tableView->setColumnHidden(10, false);
     }
 }
 

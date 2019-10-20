@@ -49,6 +49,7 @@ class MainWindow : public QWidget
         void setProtocolColumn(int state);
         void setCompletionColumn(int state);
         void setScoreColumn(int state);
+        void setSpeedColumn(int state);
         void setSyncColumn(int state);
         void setIPv4Column(int state);
         void setIPv6Column(int state);
@@ -114,6 +115,7 @@ class MainWindow : public QWidget
         QCheckBox *protocolColChechBox;
         QCheckBox *completionColChechBox;
         QCheckBox *scoreColCheckBox;
+        QCheckBox *speedColCheckBox;
         QCheckBox *syncColCheckBox;
         QCheckBox *ipv4ColCheckBox;
         QCheckBox *ipv6ColCheckBox;

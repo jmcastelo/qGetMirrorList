@@ -49,7 +49,7 @@ int MirrorModel::rowCount(const QModelIndex &parent) const
 
 int MirrorModel::columnCount(const QModelIndex &parent) const
 {
-    return 10; 
+    return 11; 
 }
 
 QVariant MirrorModel::data(const QModelIndex &index, int role) const
@@ -71,25 +71,25 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DecorationRole) {
         if (col == 1) {
             return mirrorList.at(row).flag;
-        } else if (col == 6) {
+        } else if (col == 7) {
             if (mirrorList.at(row).ipv4) {
                 return tick; 
             } else {
                 return cross;
             }
-        } else if (col == 7) {
+        } else if (col == 8) {
             if (mirrorList.at(row).ipv6) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 8) {
+        } else if (col == 9) {
             if (mirrorList.at(row).active) {
                 return tick;
             } else {
                 return cross;
             }
-        } else if (col == 9) {
+        } else if (col == 10) {
             if (mirrorList.at(row).isos) {
                 return tick;
             } else {
@@ -112,14 +112,16 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
         } else if (col == 4) {
             return QString("%1").arg(mirrorList.at(row).score, 0, 'f', 2).toDouble();
         } else if (col == 5) {
-            return mirrorList.at(row).last_sync;
+            return QString("%1").arg(mirrorList.at(row).speed, 0, 'f', 2).toDouble();
         } else if (col == 6) {
-            return mirrorList.at(row).ipv4 ? QString("Yes") : QString("No");
+            return mirrorList.at(row).last_sync;
         } else if (col == 7) {
-            return mirrorList.at(row).ipv6 ? QString("Yes") : QString("No");
+            return mirrorList.at(row).ipv4 ? QString("Yes") : QString("No");
         } else if (col == 8) {
-            return mirrorList.at(row).active ? QString("Yes") : QString("No");
+            return mirrorList.at(row).ipv6 ? QString("Yes") : QString("No");
         } else if (col == 9) {
+            return mirrorList.at(row).active ? QString("Yes") : QString("No");
+        } else if (col == 10) {
             return mirrorList.at(row).isos ? QString("Yes") : QString("No");
         } else {
             return QVariant();
@@ -147,14 +149,16 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
         } else if (section == 4) {
             return QString("Score");
         } else if (section == 5) {
-            return QString("Last sync");
+            return QString("Speed (KiB/s)");
         } else if (section == 6) {
-            return QString("IPv4");
+            return QString("Last sync");
         } else if (section == 7) {
-            return QString("IPv6");
+            return QString("IPv4");
         } else if (section == 8) {
-            return QString("Active");
+            return QString("IPv6");
         } else if (section == 9) {
+            return QString("Active");
+        } else if (section == 10) {
             return QString("ISOs");
         }
     } else if (orientation == Qt::Vertical) {
