@@ -27,10 +27,23 @@ void CountryModel::getCountryList()
     theMirrorManager.getCountryList();
 }
 
+void CountryModel::sortCountryList()
+{
+    for (int i = 0; i < countryList.size(); i++) {
+        for (int j = i+1; j < countryList.size(); j++) {
+            if (countryList.at(j).name.compare(countryList.at(i).name) < 0) {
+                countryList.swapItemsAt(i, j);
+            }
+        }
+    }
+}
+
 void CountryModel::setCountryList(QList<Country> cl)
 {
-    beginResetModel();
     countryList = cl;
+
+    beginResetModel();
+    sortCountryList();
     endResetModel();
 }
 

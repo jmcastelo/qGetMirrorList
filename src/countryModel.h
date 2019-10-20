@@ -42,6 +42,7 @@ class CountryModel : public QAbstractListModel
     private:
         QList<Country> countryList;
         MirrorManager theMirrorManager;
+        void sortCountryList();
 };
 
 #endif
