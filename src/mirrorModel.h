@@ -41,8 +41,9 @@ class MirrorModel : public QAbstractTableModel
         void selectAllMirrors(bool selected);
         void selectMirror(QString url);
         void deselectMirror(QString url);
-        void saveMirrorList(const QString file, bool allowRsync);
+        void saveMirrorList(const QString file, bool allowRsync, QStringList urls);
         void rankMirrorList();
+        void updateMirrorList(QStringList urls);
 
     signals:
         void mirrorListSet();
@@ -54,7 +55,6 @@ class MirrorModel : public QAbstractTableModel
 
     public slots:
         void getMirrorList();
-        void updateMirrorList();
 
     private slots:
         void setMirrorList(QList<Mirror> ml);

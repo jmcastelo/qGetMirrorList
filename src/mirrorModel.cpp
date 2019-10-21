@@ -193,7 +193,7 @@ void MirrorModel::deselectMirror(QString url)
     }
 }
 
-void MirrorModel::saveMirrorList(const QString file, bool allowRsync)
+void MirrorModel::saveMirrorList(const QString file, bool allowRsync, QStringList urls)
 {
     QFile outFile(file);
 
@@ -207,11 +207,10 @@ void MirrorModel::saveMirrorList(const QString file, bool allowRsync)
         out << "## Generated on " << nowString << "\n";
         out << "## with qGetMirrorList" << "\n" << "##" << "\n";
 
-        for (int i = 0; i < mirrorList.size(); i++) {
-            if (mirrorList.at(i).selected &&
-                ((mirrorList.at(i).url.startsWith("rsync") && allowRsync) ||
-                mirrorList.at(i).url.startsWith("http"))) {
-                    out << "Server = " << mirrorList.at(i).url << "\n";
+        for (int i = 0; i < urls.size(); i++) {
+            if ((urls.at(i).startsWith("rsync") && allowRsync) ||
+                urls.at(i).startsWith("http")) {
+                    out << "Server = " << urls.at(i) << "\n";
             }
         }
     }
@@ -269,10 +268,10 @@ bool MirrorModel::httpMirrorSelected()
 }
 
 // Updating mirror list requires root privileges. Using 'pkexec' to elevate user to root.
-void MirrorModel::updateMirrorList()
+void MirrorModel::updateMirrorList(QStringList urls)
 {
     if (httpMirrorSelected()) {
-        saveMirrorList("/tmp/mirrorlist", false);
+        saveMirrorList("/tmp/mirrorlist", false, urls);
 
         QStringList args = { "cp", "/tmp/mirrorlist", "/etc/pacman.d/mirrorlist" };
         QString command = "pkexec";

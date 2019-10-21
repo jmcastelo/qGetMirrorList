@@ -622,7 +622,16 @@ void MainWindow::openSaveDialog()
 
 void MainWindow::saveMirrorList(const QString file)
 {
-    mirrorModel->saveMirrorList(file, true);
+    // Get 1st column (URLs) indexes of all selected rows
+    QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
+
+    QStringList urls;
+
+    for (int i = 0; i < indexes.size(); i++) {
+        urls.append(indexes.at(i).data().toString());
+    }
+
+    mirrorModel->saveMirrorList(file, true, urls);
 }
 
 void MainWindow::rankMirrorList()
@@ -641,7 +650,16 @@ void MainWindow::updateMirrorList()
     if(!selectionModelTableView->hasSelection()) {
         QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
     } else {
-        mirrorModel->updateMirrorList();
+        // Get 1st column (URLs) indexes of all selected rows
+        QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
+
+        QStringList urls;
+
+        for (int i = 0; i < indexes.size(); i++) {
+            urls.append(indexes.at(i).data().toString());
+        }
+
+        mirrorModel->updateMirrorList(urls);
     }
     
 }
