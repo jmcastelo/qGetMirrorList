@@ -35,7 +35,8 @@ void RankingPerformer::rank(QStringList mirrorUrls)
     for (int i = 0; i < mirrorUrls.size(); i++) {
         timers[mirrorUrls.at(i)] = QTime();
         timers[mirrorUrls.at(i)].start();
-        manager.get(QNetworkRequest(QUrl(mirrorUrls[i].append(dbSubPath))));
+        QNetworkReply *reply = manager.get(QNetworkRequest(QUrl(mirrorUrls[i].append(dbSubPath))));
+        ReplyTimeout::set(reply, 10000);
     }
 
 }
@@ -55,4 +56,6 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
     if (nFinishedRequests == nRequests) {
         emit finished(kibps);
     }
+    
+    reply->deleteLater();
 }

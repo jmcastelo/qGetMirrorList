@@ -22,12 +22,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-
-struct Unit
-{
-    QUrl ulr;
-    double kibps;
-};
+#include <QBasicTimer>
+#include <QTimerEvent>
 
 class RankingPerformer : public QObject
 {
@@ -50,6 +46,52 @@ class RankingPerformer : public QObject
         int nFinishedRequests;
         QMap<QString, QTime> timers;
         QMap<QString, double> kibps;
+};
+
+class ReplyTimeout : public QObject
+{
+    Q_OBJECT
+
+    public:
+        enum HandleMethod { Abort, Close };
+        
+        ReplyTimeout(QNetworkReply* reply, const int timeout, HandleMethod method = Abort) : QObject(reply), m_method(method)
+        {
+            Q_ASSERT(reply);
+            
+            if (reply && reply->isRunning()) {
+                m_timer.start(timeout, this);
+            }
+        }
+        
+        static void set(QNetworkReply* reply, const int timeout, HandleMethod method = Abort)
+        {
+            new ReplyTimeout(reply, timeout, method);
+        }
+
+    protected:
+        void timerEvent(QTimerEvent *ev)
+        {
+            if (!m_timer.isActive() || ev->timerId() != m_timer.timerId()) {
+                return;
+            }
+    
+            auto reply = static_cast<QNetworkReply*>(parent());
+    
+            if (reply->isRunning()) {
+                if (m_method == Close) {
+                    reply->close();
+                } else if (m_method == Abort) {
+                    reply->abort();
+                }
+            }
+            
+            m_timer.stop();
+        }
+    
+    private:
+        QBasicTimer m_timer;
+        HandleMethod m_method;
 };
 
 #endif
