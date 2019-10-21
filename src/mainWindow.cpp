@@ -45,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setSortingEnabled(true);
     tableView->sortByColumn(1, Qt::AscendingOrder);
 
+    cornerButton = (QPushButton*)tableView->findChild<QAbstractButton *>();
+    cornerButton->setCheckable(true);
+
     selectionModelTableView = tableView->selectionModel();
 
     // Model and list view associated with the countries
@@ -104,11 +107,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     QVBoxLayout *waitLayout = new QVBoxLayout;
 
     QLabel *waitLabel = new QLabel("Ranking selected mirrors.\nPlease wait...");
-    //cancelRankingButton = new QPushButton("Cancel");
-    //cancelRankingButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     waitLayout->addWidget(waitLabel);
-    //waitLayout->addWidget(cancelRankingButton);
 
     waitForRankingDialog->setLayout(waitLayout);
 
@@ -120,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(rankMirrorListButton, &QPushButton::clicked, this, &MainWindow::rankMirrorList);
     connect(updateMirrorListButton, &QPushButton::clicked, this, &MainWindow::updateMirrorList);
     connect(showAllMirrorsButton, &QPushButton::clicked, this, &MainWindow::showAllMirrors);
+    // Connections: various
+    connect(cornerButton, &QPushButton::clicked, this, &MainWindow::selectAllMirrors);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
     // Connections: columns
@@ -145,10 +147,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
     // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
-    //connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, waitForRankingDialog, &QDialog::done);
-    //connect(mirrorModel, &MirrorModel::rankingMirrorsCancelled, waitForRankingDialog, &QDialog::done);
-    //connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankingMirrorList); 
+    connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, this, &MainWindow::uncheckCornerButton);
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
@@ -370,13 +370,37 @@ void MainWindow::enableWidgets()
     mirrorProxyModel->setLeastRestrictiveFilter();
 }
 
+void MainWindow::uncheckCornerButton(int r)
+{
+    if (cornerButton->isChecked()) {
+        cornerButton->setChecked(false);
+    }
+}
+
+void MainWindow::selectAllMirrors(bool state)
+{
+    if (state) {
+        // Get 1st column (URLs) indexes of all selected rows
+        QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
+        for (int i = 0; i < indexes.size(); i++) {
+            mirrorModel->selectMirror(indexes.at(i).data().toString());
+        }
+    } else {
+        // Indiscriminately deselect all mirrors
+        mirrorModel->selectAllMirrors(false);
+        tableView->clearSelection();
+    }
+}
+
 void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QString url;
+
     if (!selected.indexes().isEmpty()) {
         url = selected.indexes().at(0).data().toString();
         mirrorModel->selectMirror(url);
     }
+    
     if (!deselected.indexes().isEmpty()) {
         url = deselected.indexes().at(0).data().toString();
         mirrorModel->deselectMirror(url);
@@ -605,17 +629,6 @@ void MainWindow::rankMirrorList()
         mirrorModel->rankMirrorList();
     }
 }
-
-/*void MainWindow::rankingError(QProcess::ProcessError error)
-{
-    if (error == QProcess::FailedToStart) {
-        QMessageBox::critical(this, tr("Error"), tr("Binary 'rankmirrors' nor found!"));
-    } else if (error == QProcess::Crashed) {
-        QMessageBox::critical(this, tr("Error"), tr("Ranking mirrors cancelled."));
-    } else {
-        QMessageBox::critical(this, tr("Error"), tr("Error ranking mirrors."));
-    }
-}*/
 
 void MainWindow::updateMirrorList()
 {

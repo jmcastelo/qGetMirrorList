@@ -42,7 +42,9 @@ class MainWindow : public QWidget
         void enableWidgets();
         
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
+        void selectAllMirrors(bool state);
         void showAllMirrors();
+        void uncheckCornerButton(int r);
 
         void setUrlColumn(int state);
         void setCountryColumn(int state);
@@ -66,7 +68,6 @@ class MainWindow : public QWidget
         void filterByIPv6(int state);
         
         void rankMirrorList();
-        //void rankingError(QProcess::ProcessError error);
         
         void updateMirrorList();
         void updateFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -91,6 +92,8 @@ class MainWindow : public QWidget
         void createMirrorTableGroupBox();
         void createMirrorColumnSelectGroupBox();
 
+        QPushButton *cornerButton;
+        
         QGroupBox *mirrorActionsGroupBox;
         QGroupBox *mirrorTableGroupBox;
         QGroupBox *mirrorColumnSelectGroupBox;
@@ -124,7 +127,6 @@ class MainWindow : public QWidget
 
         QFileDialog *saveMirrorListDialog;
         QDialog *waitForRankingDialog;
-        //QPushButton *cancelRankingButton;
 };
 
 #endif
