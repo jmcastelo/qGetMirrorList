@@ -44,7 +44,8 @@ class MirrorModel : public QAbstractTableModel
 
     signals:
         void mirrorListSet();
-        //void rankingMirrors();
+        void rankingMirrorsStarted();
+        void rankingMirrorsFinished(int r);
         //void rankingMirrorsEnd(int r);
         //void rankingMirrorsCancelled(int r);
         //void rankingMirrorsError(QProcess::ProcessError error);

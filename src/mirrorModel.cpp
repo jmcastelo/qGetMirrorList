@@ -235,6 +235,8 @@ void MirrorModel::rankMirrorList()
     }
 
     ranker.rank(mirrorUrls);
+
+    emit rankingMirrorsStarted();
 }
 
 void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
@@ -245,6 +247,8 @@ void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
         mirrorList[i].selected = false;
     }
     endResetModel();
+
+    emit rankingMirrorsFinished(0);
 }
 
 /*void MirrorModel::rankMirrorList()

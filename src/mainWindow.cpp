@@ -104,11 +104,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     QVBoxLayout *waitLayout = new QVBoxLayout;
 
     QLabel *waitLabel = new QLabel("Ranking selected mirrors.\nPlease wait...");
-    cancelRankingButton = new QPushButton("Cancel");
-    cancelRankingButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    //cancelRankingButton = new QPushButton("Cancel");
+    //cancelRankingButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     waitLayout->addWidget(waitLabel);
-    waitLayout->addWidget(cancelRankingButton);
+    //waitLayout->addWidget(cancelRankingButton);
 
     waitForRankingDialog->setLayout(waitLayout);
 
@@ -144,9 +144,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
     // Connections: ranking
-    //connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
     //connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
-    //connect(mirrorModel, &MirrorModel::rankingMirrorsEnd, waitForRankingDialog, &QDialog::done);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, waitForRankingDialog, &QDialog::done);
     //connect(mirrorModel, &MirrorModel::rankingMirrorsCancelled, waitForRankingDialog, &QDialog::done);
     //connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankingMirrorList); 
     // Connections: update & about
