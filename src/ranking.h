@@ -18,12 +18,40 @@
 #ifndef RANKING_H
 #define RANKING_H
 
-#include <QObject>
+//#include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QBasicTimer>
 #include <QTimerEvent>
+#include <QProcess>
+#include <QFile>
+
+class RsyncProcess : public QObject
+{
+    Q_OBJECT
+
+    public:
+        RsyncProcess(QObject *parent);
+        void init(int i, QString oneUrl, int theTimeout);
+        void start();
+
+    signals:
+        void processFinished(int index, QString url, double speed);
+
+    private slots:
+        void startTimer();
+        void getSpeed(int exitCode, QProcess::ExitStatus exitStatus);
+
+    private:
+        int index;
+        int timeout;
+        QString url;
+        QString path;
+        QTime timer;
+        double speed;
+        QProcess rsync;
+};
 
 class RankingPerformer : public QObject
 {
@@ -38,14 +66,23 @@ class RankingPerformer : public QObject
 
     private slots:
         void requestFinished(QNetworkReply *reply);
+        void getSpeed(int index, QString url, double speed);
 
     private:
         QNetworkAccessManager manager;
+        
         QString dbSubPath;
+        int connectionTimeout;
+        
         int nRequests;
         int nFinishedRequests;
+        
+        QList<RsyncProcess*> rsyncProcesses;
+        
         QMap<QString, QTime> timers;
         QMap<QString, double> kibps;
+
+        QStringList getByProtocol(QString protocol, QStringList urls);
 };
 
 class ReplyTimeout : public QObject
