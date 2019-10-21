@@ -210,7 +210,7 @@ void MirrorModel::saveMirrorList(const QString file, bool allowRsync, QStringLis
         for (int i = 0; i < urls.size(); i++) {
             if ((urls.at(i).startsWith("rsync") && allowRsync) ||
                 urls.at(i).startsWith("http")) {
-                    out << "Server = " << urls.at(i) << "\n";
+                    out << "Server = " << urls.at(i) << "$repo/os/$arch\n";
             }
         }
     }

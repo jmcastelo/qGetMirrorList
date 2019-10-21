@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    //tableView->verticalHeader()->setVisible(false);
+    tableView->horizontalHeader()->setSectionsMovable(true);
     tableView->setAlternatingRowColors(true);
     tableView->setShowGrid(false);
     tableView->setSortingEnabled(true);
