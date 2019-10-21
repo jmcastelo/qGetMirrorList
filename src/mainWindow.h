@@ -66,12 +66,15 @@ class MainWindow : public QWidget
         void filterByIsos(int state);
         void filterByIPv4(int state);
         void filterByIPv6(int state);
+
+        void saveMirrorList(const QString file);
         
         void rankMirrorList();
         
         void updateMirrorList();
         void updateFinished(int exitCode, QProcess::ExitStatus exitStatus);
         void updateMirrorListError(QProcess::ProcessError error);
+        void showHttpDialog();
         
         void openSaveDialog();
         

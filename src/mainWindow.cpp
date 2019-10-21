@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(getMirrorListButton, &QPushButton::clicked, mirrorModel, &MirrorModel::getMirrorList);
     connect(getMirrorListButton, &QPushButton::clicked, countryModel, &CountryModel::getCountryList);
     connect(saveMirrorListButton, &QPushButton::clicked, this, &MainWindow::openSaveDialog);
-    connect(saveMirrorListDialog, &QFileDialog::fileSelected, mirrorModel, &MirrorModel::saveMirrorList);
+    connect(saveMirrorListDialog, &QFileDialog::fileSelected, this, &MainWindow::saveMirrorList);
     connect(rankMirrorListButton, &QPushButton::clicked, this, &MainWindow::rankMirrorList);
     connect(updateMirrorListButton, &QPushButton::clicked, this, &MainWindow::updateMirrorList);
     connect(showAllMirrorsButton, &QPushButton::clicked, this, &MainWindow::showAllMirrors);
@@ -152,6 +152,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
+    connect(mirrorModel, &MirrorModel::noHttpMirrorSelected, this, &MainWindow::showHttpDialog);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
 }
 
@@ -619,6 +620,11 @@ void MainWindow::openSaveDialog()
     }
 }
 
+void MainWindow::saveMirrorList(const QString file)
+{
+    mirrorModel->saveMirrorList(file, true);
+}
+
 void MainWindow::rankMirrorList()
 {
     QModelIndexList indexList = selectionModelTableView->selectedRows(0);
@@ -656,6 +662,11 @@ void MainWindow::updateMirrorListError(QProcess::ProcessError error)
     } else {
         QMessageBox::critical(this, tr("Error"), tr("Error updating '/etc/pacman.d/mirrorlist'"));
     }
+}
+
+void MainWindow::showHttpDialog()
+{
+    QMessageBox::critical(this, tr("Error"), tr("No mirror with http or https protocols selected.\nPlease select at least one for Pacman use."));
 }
 
 void MainWindow::about()

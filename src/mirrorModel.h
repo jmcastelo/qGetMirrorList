@@ -41,6 +41,7 @@ class MirrorModel : public QAbstractTableModel
         void selectAllMirrors(bool selected);
         void selectMirror(QString url);
         void deselectMirror(QString url);
+        void saveMirrorList(const QString file, bool allowRsync);
         void rankMirrorList();
 
     signals:
@@ -49,10 +50,10 @@ class MirrorModel : public QAbstractTableModel
         void rankingMirrorsFinished(int r);
         void updateMirrorListFinished(int exitCode, QProcess::ExitStatus exitStatus);
         void updateMirrorListError(QProcess::ProcessError error);
+        void noHttpMirrorSelected();
 
     public slots:
         void getMirrorList();
-        void saveMirrorList(const QString file);
         void updateMirrorList();
 
     private slots:
@@ -65,6 +66,7 @@ class MirrorModel : public QAbstractTableModel
         MirrorManager theMirrorManager;
         RankingPerformer ranker;
         int countSelectedMirrors();
+        bool httpMirrorSelected();
 };
 
 #endif

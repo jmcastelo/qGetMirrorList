@@ -193,7 +193,7 @@ void MirrorModel::deselectMirror(QString url)
     }
 }
 
-void MirrorModel::saveMirrorList(const QString file)
+void MirrorModel::saveMirrorList(const QString file, bool allowRsync)
 {
     QFile outFile(file);
 
@@ -205,11 +205,13 @@ void MirrorModel::saveMirrorList(const QString file)
         
         out << "##" << "\n" << "## Arch Linux repository mirrorlist" << "\n";
         out << "## Generated on " << nowString << "\n";
-        out << "## By qGetMirrorList" << "\n" << "##" << "\n";
+        out << "## with qGetMirrorList" << "\n" << "##" << "\n";
 
         for (int i = 0; i < mirrorList.size(); i++) {
-            if (mirrorList.at(i).selected) {
-                out << "Server = " << mirrorList.at(i).url << "\n";
+            if (mirrorList.at(i).selected &&
+                ((mirrorList.at(i).url.startsWith("rsync") && allowRsync) ||
+                mirrorList.at(i).url.startsWith("http"))) {
+                    out << "Server = " << mirrorList.at(i).url << "\n";
             }
         }
     }
@@ -255,13 +257,28 @@ void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
     emit rankingMirrorsFinished(0);
 }
 
+bool MirrorModel::httpMirrorSelected()
+{
+    for (int i = 0; i < mirrorList.size(); i++) {
+        if (mirrorList.at(i).selected && mirrorList.at(i).url.startsWith("http")) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // Updating mirror list requires root privileges. Using 'pkexec' to elevate user to root.
 void MirrorModel::updateMirrorList()
 {
-    saveMirrorList("/tmp/mirrorlist");
+    if (httpMirrorSelected()) {
+        saveMirrorList("/tmp/mirrorlist", false);
 
-    QStringList args = { "cp", "/tmp/mirrorlist", "/etc/pacman.d/mirrorlist" };
-    QString command = "pkexec";
+        QStringList args = { "cp", "/tmp/mirrorlist", "/etc/pacman.d/mirrorlist" };
+        QString command = "pkexec";
     
-    updatemirrorlist.start(command, args);
+        updatemirrorlist.start(command, args);
+    } else {
+        emit noHttpMirrorSelected();
+    }
 }

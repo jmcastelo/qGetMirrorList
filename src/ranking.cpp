@@ -16,6 +16,7 @@
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "ranking.h"
+#include <QFileInfo>
 
 RsyncProcess::RsyncProcess (QObject *parent): QObject(parent)
 {
@@ -86,7 +87,6 @@ void RankingPerformer::rank(QStringList mirrorUrls)
     nFinishedRequests = 0;
 
     QStringList httpUrls = getByProtocol("http", mirrorUrls);
-    QStringList rsyncUrls = getByProtocol("rsync", mirrorUrls);
 
     timers.clear();
     kibps.clear();
@@ -94,23 +94,29 @@ void RankingPerformer::rank(QStringList mirrorUrls)
     for (int i = 0; i < httpUrls.size(); i++) {
         timers[httpUrls.at(i)] = QTime();
         timers[httpUrls.at(i)].start();
+
         QNetworkReply *reply = manager.get(QNetworkRequest(QUrl(httpUrls[i].append(dbSubPath))));
+        
         ReplyTimeout::set(reply, connectionTimeout);
     }
 
-    rsyncProcesses.clear();
-
-    for (int i = 0; i < rsyncUrls.size(); i++) {
-        QString url = rsyncUrls.at(i);
-        url.append(dbSubPath);
-
-        rsyncProcesses.append(new RsyncProcess(this));
+    if (QFileInfo::exists("/usr/bin/rsync")) {
+        QStringList rsyncUrls = getByProtocol("rsync", mirrorUrls);
         
-        rsyncProcesses.at(i)->init(i, url, connectionTimeout);
+        rsyncProcesses.clear();
 
-        connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
+        for (int i = 0; i < rsyncUrls.size(); i++) {
+            QString url = rsyncUrls.at(i);
+            url.append(dbSubPath);
 
-        rsyncProcesses.at(i)->start();
+            rsyncProcesses.append(new RsyncProcess(this));
+        
+            rsyncProcesses.at(i)->init(i, url, connectionTimeout);
+
+            connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
+
+            rsyncProcesses.at(i)->start();
+        }
     }
 }
 
