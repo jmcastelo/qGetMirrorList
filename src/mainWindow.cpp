@@ -39,7 +39,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    //tableView->verticalHeader()->setVisible(false);
     tableView->setAlternatingRowColors(true);
+    tableView->setShowGrid(false);
     tableView->setSortingEnabled(true);
     tableView->sortByColumn(1, Qt::AscendingOrder);
 
@@ -142,11 +144,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
     // Connections: ranking
-    connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
-    connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
-    connect(mirrorModel, &MirrorModel::rankingMirrorsEnd, waitForRankingDialog, &QDialog::done);
-    connect(mirrorModel, &MirrorModel::rankingMirrorsCancelled, waitForRankingDialog, &QDialog::done);
-    connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankingMirrorList); 
+    //connect(mirrorModel, &MirrorModel::rankingMirrors, waitForRankingDialog, &QDialog::open);
+    //connect(mirrorModel, &MirrorModel::rankingMirrorsError, this, &MainWindow::rankingError);
+    //connect(mirrorModel, &MirrorModel::rankingMirrorsEnd, waitForRankingDialog, &QDialog::done);
+    //connect(mirrorModel, &MirrorModel::rankingMirrorsCancelled, waitForRankingDialog, &QDialog::done);
+    //connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankingMirrorList); 
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
@@ -364,20 +366,20 @@ void MainWindow::enableWidgets()
     if (!ipv6CheckBox->isEnabled()) {
         ipv6CheckBox->setEnabled(true);
     }
+
+    mirrorProxyModel->setLeastRestrictiveFilter();
 }
 
 void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    QModelIndexList items = selected.indexes();
-
-    for (const QModelIndex &index : qAsConst(items)) {
-       mirrorModel->selectMirror(index.row());
+    QString url;
+    if (!selected.indexes().isEmpty()) {
+        url = selected.indexes().at(0).data().toString();
+        mirrorModel->selectMirror(url);
     }
-
-    items = deselected.indexes();
-
-    for (const QModelIndex &index : qAsConst(items)) {
-        mirrorModel->deselectMirror(index.row());
+    if (!deselected.indexes().isEmpty()) {
+        url = deselected.indexes().at(0).data().toString();
+        mirrorModel->deselectMirror(url);
     }
 }
 
@@ -597,14 +599,14 @@ void MainWindow::rankMirrorList()
 {
     QModelIndexList indexList = selectionModelTableView->selectedRows(0);
 
-    if(indexList.size() < 2) {
-        QMessageBox::critical(this, tr("Error"), tr("Please select at least two mirrors."));
+    if(!selectionModelTableView->hasSelection()) {
+        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
     } else {
         mirrorModel->rankMirrorList();
     }
 }
 
-void MainWindow::rankingError(QProcess::ProcessError error)
+/*void MainWindow::rankingError(QProcess::ProcessError error)
 {
     if (error == QProcess::FailedToStart) {
         QMessageBox::critical(this, tr("Error"), tr("Binary 'rankmirrors' nor found!"));
@@ -613,7 +615,7 @@ void MainWindow::rankingError(QProcess::ProcessError error)
     } else {
         QMessageBox::critical(this, tr("Error"), tr("Error ranking mirrors."));
     }
-}
+}*/
 
 void MainWindow::updateMirrorList()
 {

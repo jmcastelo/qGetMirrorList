@@ -21,9 +21,10 @@ MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
     // Connections
     connect(&theMirrorManager, &MirrorManager::mirrorListReady, this, &MirrorModel::setMirrorList);
-    connect(&rankmirrors, &QProcess::started, this, &MirrorModel::rankingMirrors);
-    connect(&rankmirrors, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MirrorModel::readRankedMirrorList);
-    connect(&rankmirrors, &QProcess::errorOccurred, this, &MirrorModel::rankingMirrorsError);
+    connect(&ranker, &RankingPerformer::finished, this, &MirrorModel::setMirrorSpeeds);
+    //connect(&rankmirrors, &QProcess::started, this, &MirrorModel::rankingMirrors);
+    //connect(&rankmirrors, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MirrorModel::readRankedMirrorList);
+    //connect(&rankmirrors, &QProcess::errorOccurred, this, &MirrorModel::rankingMirrorsError);
     connect(&updatemirrorlist, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MirrorModel::updateMirrorListFinished);
     connect(&updatemirrorlist, &QProcess::errorOccurred, this, &MirrorModel::updateMirrorListError);
 }
@@ -168,14 +169,24 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void MirrorModel::selectMirror(int index)
+void MirrorModel::selectMirror(QString url)
 {
-    mirrorList[index].selected = true;
+    for (int i = 0; i < mirrorList.size(); i++) {
+        if (mirrorList.at(i).url == url) {
+            mirrorList[i].selected = true;
+            break;
+        }
+    }
 }
 
-void MirrorModel::deselectMirror(int index)
+void MirrorModel::deselectMirror(QString url)
 {
-    mirrorList[index].selected = false;
+    for (int i = 0; i < mirrorList.size(); i++) {
+        if (mirrorList.at(i).url == url) {
+            mirrorList[i].selected = false;
+            break;
+        }
+    }
 }
 
 void MirrorModel::saveMirrorList(const QString file)
@@ -214,6 +225,29 @@ int MirrorModel::countSelectedMirrors()
 }
 
 void MirrorModel::rankMirrorList()
+{
+    QStringList mirrorUrls;
+
+    for (int i = 0; i < mirrorList.size(); i++) {
+        if (mirrorList.at(i).selected) {
+            mirrorUrls.append(mirrorList.at(i).url);
+        }
+    }
+
+    ranker.rank(mirrorUrls);
+}
+
+void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
+{
+    beginResetModel();
+    for (int i = 0; i < mirrorList.size(); i++) {
+        mirrorList[i].speed = speeds.value(mirrorList.at(i).url, mirrorList.at(i).speed);
+        mirrorList[i].selected = false;
+    }
+    endResetModel();
+}
+
+/*void MirrorModel::rankMirrorList()
 {
     QString path = "/tmp/mirrorlist";
     
@@ -262,7 +296,7 @@ void MirrorModel::cancelRankingMirrorList()
 {
     rankmirrors.close();
     emit rankingMirrorsCancelled(0);
-}
+}*/
 
 // Updating mirror list requires root privileges. Using 'pkexec' to elevate user to root.
 void MirrorModel::updateMirrorList()

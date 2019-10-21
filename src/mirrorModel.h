@@ -19,6 +19,7 @@
 #define MIRRORMODEL_H
 
 #include "mirrorManager.h"
+#include "ranking.h"
 #include <QAbstractTableModel>
 #include <QVariant>
 #include <QString>
@@ -37,35 +38,37 @@ class MirrorModel : public QAbstractTableModel
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         
-        void selectMirror(int index);
-        void deselectMirror(int index);
+        void selectMirror(QString url);
+        void deselectMirror(QString url);
         void rankMirrorList();
 
     signals:
         void mirrorListSet();
-        void rankingMirrors();
-        void rankingMirrorsEnd(int r);
-        void rankingMirrorsCancelled(int r);
-        void rankingMirrorsError(QProcess::ProcessError error);
+        //void rankingMirrors();
+        //void rankingMirrorsEnd(int r);
+        //void rankingMirrorsCancelled(int r);
+        //void rankingMirrorsError(QProcess::ProcessError error);
         void updateMirrorListFinished(int exitCode, QProcess::ExitStatus exitStatus);
         void updateMirrorListError(QProcess::ProcessError error);
 
     public slots:
         void getMirrorList();
         void saveMirrorList(const QString file);
-        void cancelRankingMirrorList();
+        //void cancelRankingMirrorList();
         void updateMirrorList();
 
     private slots:
         void setMirrorList(QList<Mirror> ml);
-        void readRankedMirrorList(int exitCode, QProcess::ExitStatus exitStatus);
+        void setMirrorSpeeds(QMap<QString, double> speeds);
+        //void readRankedMirrorList(int exitCode, QProcess::ExitStatus exitStatus);
 
     private:
         QList<Mirror> mirrorList;
         QList<Mirror> selectedMirrorList;
-        QProcess rankmirrors;
+        //QProcess rankmirrors;
         QProcess updatemirrorlist;
         MirrorManager theMirrorManager;
+        RankingPerformer ranker;
         int countSelectedMirrors();
 };
 

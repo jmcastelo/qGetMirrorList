@@ -34,6 +34,8 @@ QList<Mirror> MirrorParser::getMirrorList()
 
 void MirrorParser::parseMirrorList()
 {
+    mirrorList.clear();
+
     Mirror oneMirror;
 
     oneMirror.selected = false;

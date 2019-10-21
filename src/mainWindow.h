@@ -66,7 +66,7 @@ class MainWindow : public QWidget
         void filterByIPv6(int state);
         
         void rankMirrorList();
-        void rankingError(QProcess::ProcessError error);
+        //void rankingError(QProcess::ProcessError error);
         
         void updateMirrorList();
         void updateFinished(int exitCode, QProcess::ExitStatus exitStatus);
