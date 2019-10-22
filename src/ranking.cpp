@@ -83,10 +83,11 @@ QStringList RankingPerformer::getByProtocol(QString protocol, QStringList urls)
 
 void RankingPerformer::rank(QStringList mirrorUrls)
 {
-    nRequests = mirrorUrls.size();
     nFinishedRequests = 0;
 
     QStringList httpUrls = getByProtocol("http", mirrorUrls);
+
+    nRequests = httpUrls.size();
 
     timers.clear();
     kibps.clear();
@@ -103,6 +104,8 @@ void RankingPerformer::rank(QStringList mirrorUrls)
     if (QFileInfo::exists("/usr/bin/rsync")) {
         QStringList rsyncUrls = getByProtocol("rsync", mirrorUrls);
         
+        nRequests += rsyncUrls.size();
+
         rsyncProcesses.clear();
 
         for (int i = 0; i < rsyncUrls.size(); i++) {

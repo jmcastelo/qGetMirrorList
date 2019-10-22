@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QHeaderView>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
