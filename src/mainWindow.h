@@ -30,6 +30,7 @@
 #include <QItemSelectionModel>
 #include <QCheckBox>
 #include <QFileDialog>
+#include <QProgressBar>
 
 class MainWindow : public QWidget
 {
@@ -132,6 +133,7 @@ class MainWindow : public QWidget
 
         QFileDialog *saveMirrorListDialog;
         QDialog *waitForRankingDialog;
+        QProgressBar *rankingProgressBar;
 };
 
 #endif

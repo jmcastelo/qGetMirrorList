@@ -49,6 +49,8 @@ class MirrorModel : public QAbstractTableModel
         void mirrorListSet();
         void rankingMirrorsStarted();
         void rankingMirrorsFinished(int r);
+        void setProgressBarMax(int max);
+        void setProgressBarValue(int value);
         void updateMirrorListFinished(int exitCode, QProcess::ExitStatus exitStatus);
         void updateMirrorListError(QProcess::ProcessError error);
         void noHttpMirrorSelected();

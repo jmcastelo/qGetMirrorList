@@ -114,7 +114,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     QLabel *waitLabel = new QLabel("Ranking selected mirrors.\nPlease wait...");
 
+    rankingProgressBar = new QProgressBar(this);
+    rankingProgressBar->setMinimum(0);
+
     waitLayout->addWidget(waitLabel);
+    waitLayout->addWidget(rankingProgressBar);
 
     waitForRankingDialog->setLayout(waitLayout);
 
@@ -154,8 +158,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
     // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, rankingProgressBar, &QProgressBar::reset);
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, waitForRankingDialog, &QDialog::done);
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, this, &MainWindow::uncheckCornerButton);
+    connect(mirrorModel, &MirrorModel::setProgressBarMax, rankingProgressBar, &QProgressBar::setMaximum);
+    connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);

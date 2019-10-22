@@ -62,6 +62,8 @@ class RankingPerformer : public QObject
         void rank(QStringList mirrorUrls);
 
     signals:
+        void started(int max);
+        void oneMirrorRanked(int value);
         void finished(QMap<QString, double> speeds);
 
     private slots:

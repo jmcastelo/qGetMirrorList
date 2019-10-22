@@ -124,6 +124,8 @@ void RankingPerformer::rank(QStringList mirrorUrls)
             rsyncProcesses.at(i)->start();
         }
     }
+
+    emit started(nRequests);
 }
 
 void RankingPerformer::requestFinished(QNetworkReply *reply)
@@ -137,6 +139,8 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
     kibps[url] = 1000.0*data.size()/(1024.0*timeElapsed);
 
     nFinishedRequests++;
+
+    emit oneMirrorRanked(nFinishedRequests);
 
     if (nFinishedRequests == nRequests) {
         emit finished(kibps);
@@ -152,6 +156,8 @@ void RankingPerformer::getSpeed(int index, QString url, double speed)
     kibps[baseUrl] = speed;
 
     nFinishedRequests++;
+
+    emit oneMirrorRanked(nFinishedRequests);
 
     if (nFinishedRequests == nRequests) {
         emit finished(kibps);
