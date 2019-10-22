@@ -48,7 +48,7 @@ void MirrorParser::parseMirrorList()
         oneMirror.protocol = loopObject["protocol"].toString();
         oneMirror.last_sync = getLocalDateTime(loopObject["last_sync"].toString());
         oneMirror.completion_pct = 100*loopObject["completion_pct"].toDouble();
-        //oneMirror.delay = loopObject["delay"].toInt();
+        oneMirror.delay = getDelay(loopObject["delay"].toInt());
         //oneMirror.duration_avg = loopObject["duration_avg"].toDouble();
         //oneMirror.duration_stddev = loopObject["duration_stddev"].toDouble();
         oneMirror.score = loopObject["score"].toDouble();
@@ -69,6 +69,11 @@ QDateTime MirrorParser::getLocalDateTime(QString date)
     QDateTime dateTime = QDateTime::fromString(date, Qt::ISODate);
     dateTime.setTimeSpec(Qt::LocalTime);
     return dateTime;
+}
+
+QTime MirrorParser::getDelay(int delaySeconds) {
+    QTime origin(0, 0, 0);
+    return origin.addSecs(delaySeconds);
 }
 
 QString MirrorParser::getCountry(QString country)

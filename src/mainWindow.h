@@ -53,6 +53,7 @@ class MainWindow : public QWidget
         void setScoreColumn(int state);
         void setSpeedColumn(int state);
         void setSyncColumn(int state);
+        void setDelayColumn(int state);
         void setIPv4Column(int state);
         void setIPv6Column(int state);
         void setActiveColumn(int state);
@@ -123,6 +124,7 @@ class MainWindow : public QWidget
         QCheckBox *scoreColCheckBox;
         QCheckBox *speedColCheckBox;
         QCheckBox *syncColCheckBox;
+        QCheckBox *delayColCheckBox;
         QCheckBox *ipv4ColCheckBox;
         QCheckBox *ipv6ColCheckBox;
         QCheckBox *activeColCheckBox;

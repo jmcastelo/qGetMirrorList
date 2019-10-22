@@ -45,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setSortingEnabled(true);
     tableView->sortByColumn(1, Qt::AscendingOrder);
 
+    tableView->setColumnHidden(8, true);
+    tableView->setColumnHidden(10, true);
+    tableView->setColumnHidden(11, true);
+
     cornerButton = (QPushButton*)tableView->findChild<QAbstractButton *>();
     cornerButton->setCheckable(true);
 
@@ -132,6 +136,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(scoreColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setScoreColumn);
     connect(speedColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setSpeedColumn);
     connect(syncColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setSyncColumn);
+    connect(delayColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setDelayColumn);
     connect(ipv4ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv4Column);
     connect(ipv6ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv6Column);
     connect(activeColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setActiveColumn);
@@ -297,6 +302,7 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     scoreColCheckBox = new QCheckBox("Score", this);
     speedColCheckBox = new QCheckBox("Speed (KiB/s)", this);
     syncColCheckBox = new QCheckBox("Last sync", this);
+    delayColCheckBox = new QCheckBox("Delay (hh:mm)", this);
     ipv4ColCheckBox = new QCheckBox("IPv4", this);
     ipv6ColCheckBox = new QCheckBox("IPv6", this);
     activeColCheckBox = new QCheckBox("Active", this);
@@ -309,10 +315,11 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     scoreColCheckBox->setCheckState(Qt::Checked);
     speedColCheckBox->setCheckState(Qt::Checked);
     syncColCheckBox->setCheckState(Qt::Checked);
-    ipv4ColCheckBox->setCheckState(Qt::Checked);
+    delayColCheckBox->setCheckState(Qt::Checked);
+    ipv4ColCheckBox->setCheckState(Qt::Unchecked);
     ipv6ColCheckBox->setCheckState(Qt::Checked);
-    activeColCheckBox->setCheckState(Qt::Checked);
-    isosColCheckBox->setCheckState(Qt::Checked);
+    activeColCheckBox->setCheckState(Qt::Unchecked);
+    isosColCheckBox->setCheckState(Qt::Unchecked);
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(urlColCheckBox);
@@ -322,6 +329,7 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     layout->addWidget(scoreColCheckBox);
     layout->addWidget(speedColCheckBox);
     layout->addWidget(syncColCheckBox);
+    layout->addWidget(delayColCheckBox);
     layout->addWidget(ipv4ColCheckBox);
     layout->addWidget(ipv6ColCheckBox);
     layout->addWidget(activeColCheckBox);
@@ -471,7 +479,7 @@ void MainWindow::setSyncColumn(int state)
     }
 }
 
-void MainWindow::setIPv4Column(int state)
+void MainWindow::setDelayColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(7, true);
@@ -480,7 +488,7 @@ void MainWindow::setIPv4Column(int state)
     }
 }
 
-void MainWindow::setIPv6Column(int state)
+void MainWindow::setIPv4Column(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(8, true);
@@ -489,7 +497,7 @@ void MainWindow::setIPv6Column(int state)
     }
 }
 
-void MainWindow::setActiveColumn(int state)
+void MainWindow::setIPv6Column(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(9, true);
@@ -498,12 +506,21 @@ void MainWindow::setActiveColumn(int state)
     }
 }
 
-void MainWindow::setIsosColumn(int state)
+void MainWindow::setActiveColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(10, true);
     } else {
         tableView->setColumnHidden(10, false);
+    }
+}
+
+void MainWindow::setIsosColumn(int state)
+{
+    if (state == Qt::Unchecked) {
+        tableView->setColumnHidden(11, true);
+    } else {
+        tableView->setColumnHidden(11, false);
     }
 }
 

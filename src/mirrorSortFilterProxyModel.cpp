@@ -50,6 +50,8 @@ bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelI
         return leftData.toString().compare(rightData.toString(), Qt::CaseSensitive) < 0;
     } else if (leftData.type() == QVariant::Double) {
         return leftData.toDouble() < rightData.toDouble();
+    } else if (leftData.type() == QVariant::Time) {
+        return leftData.toTime() < rightData.toTime();
     }
 
     return false;
@@ -59,17 +61,17 @@ bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
 {
     QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent);
     QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent);
-    QModelIndex index7 = sourceModel()->index(sourceRow, 7, sourceParent);
-    QModelIndex index8 = sourceModel()->index(sourceRow, 8, sourceParent);
-    QModelIndex index9 = sourceModel()->index(sourceRow, 9, sourceParent);
-    QModelIndex index10 = sourceModel()->index(sourceRow, 10, sourceParent);
+    QModelIndex index3 = sourceModel()->index(sourceRow, 8, sourceParent);
+    QModelIndex index4 = sourceModel()->index(sourceRow, 9, sourceParent);
+    QModelIndex index5 = sourceModel()->index(sourceRow, 10, sourceParent);
+    QModelIndex index6 = sourceModel()->index(sourceRow, 11, sourceParent);
 
     QString country = sourceModel()->data(index1).toString();
     QString protocol = sourceModel()->data(index2).toString();
-    QString active = sourceModel()->data(index9).toString();
-    QString isos = sourceModel()->data(index10).toString();
-    QString ipv4 = sourceModel()->data(index7).toString();
-    QString ipv6 = sourceModel()->data(index8).toString();
+    QString ipv4 = sourceModel()->data(index3).toString();
+    QString ipv6 = sourceModel()->data(index4).toString();
+    QString active = sourceModel()->data(index5).toString();
+    QString isos = sourceModel()->data(index6).toString();
 
     if ((filter.countryList.isEmpty() ||
         filter.countryList.contains(country)) &&

@@ -23,6 +23,7 @@
 #include <QString>
 #include <QStringList>
 #include <QJsonArray>
+#include <QTime>
 
 class MirrorParser
 {
@@ -36,6 +37,7 @@ class MirrorParser
         void parseCountries();
         
         QDateTime getLocalDateTime(QString date);
+        QTime getDelay(int delaySeconds);
         QPixmap getFlag(QString country);
         QString getCountry(QString country);
 

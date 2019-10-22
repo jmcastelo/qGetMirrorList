@@ -21,6 +21,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QPixmap>
+#include <QTime>
 
 struct Mirror
 {
@@ -28,7 +29,7 @@ struct Mirror
     QString protocol;
     QDateTime last_sync;
     double completion_pct;
-    //int delay;
+    QTime delay;
     //double duration_avg;
     //double duration_stddev;
     double score;
