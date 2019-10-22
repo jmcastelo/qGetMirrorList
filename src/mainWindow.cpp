@@ -16,6 +16,7 @@
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mainWindow.h"
+#include "columns.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -43,11 +44,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setAlternatingRowColors(true);
     tableView->setShowGrid(false);
     tableView->setSortingEnabled(true);
-    tableView->sortByColumn(1, Qt::AscendingOrder);
+    tableView->sortByColumn(Columns::country, Qt::AscendingOrder);
 
-    tableView->setColumnHidden(8, true);
-    tableView->setColumnHidden(10, true);
-    tableView->setColumnHidden(11, true);
+    tableView->setColumnHidden(Columns::ipv4, true);
+    tableView->setColumnHidden(Columns::active, true);
+    tableView->setColumnHidden(Columns::isos, true);
 
     cornerButton = (QPushButton*)tableView->findChild<QAbstractButton *>();
     cornerButton->setCheckable(true);
@@ -179,9 +180,9 @@ void MainWindow::createMirrorActionsGroubBox()
     pixmap.load(":/images/icons/key.png");
     updateMirrorListButton->setIcon(QIcon(pixmap));
 
-    getMirrorListButton->setToolTip("Fetch all available mirrors from https://www.archlinux.org/mirrorlist/");
+    getMirrorListButton->setToolTip("Fetch all available mirrors from the Internet"); 
     saveMirrorListButton->setToolTip("Save select mirrors to chosen file");
-    rankMirrorListButton->setToolTip("Rank selected mirrors by speed with 'rankmirrors' utility");
+    rankMirrorListButton->setToolTip("Rank selected mirrors by speed");
     showAllMirrorsButton->setToolTip("Show all mirrors");
     updateMirrorListButton->setToolTip("Update '/etc/pacman.d/mirrorlist' with selected mirrors as root");
 
@@ -419,108 +420,108 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
 void MainWindow::setUrlColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(0, true);
+        tableView->setColumnHidden(Columns::url, true);
     } else {
-        tableView->setColumnHidden(0, false);
+        tableView->setColumnHidden(Columns::url, false);
     }
 }
 
 void MainWindow::setCountryColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(1, true);
+        tableView->setColumnHidden(Columns::country, true);
     } else {
-        tableView->setColumnHidden(1, false);
+        tableView->setColumnHidden(Columns::country, false);
     }
 }
 
 void MainWindow::setProtocolColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(2, true);
+        tableView->setColumnHidden(Columns::protocol, true);
     } else {
-        tableView->setColumnHidden(2, false);
+        tableView->setColumnHidden(Columns::protocol, false);
     }
 }
 
 void MainWindow::setCompletionColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(3, true);
+        tableView->setColumnHidden(Columns::completion_pct, true);
     } else {
-        tableView->setColumnHidden(3, false);
+        tableView->setColumnHidden(Columns::completion_pct, false);
     }
 }
 
 void MainWindow::setScoreColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(4, true);
+        tableView->setColumnHidden(Columns::score, true);
     } else {
-        tableView->setColumnHidden(4, false);
+        tableView->setColumnHidden(Columns::score, false);
     }
 }
 
 void MainWindow::setSpeedColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(5, true);
+        tableView->setColumnHidden(Columns::speed, true);
     } else {
-        tableView->setColumnHidden(5, false);
+        tableView->setColumnHidden(Columns::speed, false);
     }
 }
 
 void MainWindow::setSyncColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(6, true);
+        tableView->setColumnHidden(Columns::last_sync, true);
     } else {
-        tableView->setColumnHidden(6, false);
+        tableView->setColumnHidden(Columns::last_sync, false);
     }
 }
 
 void MainWindow::setDelayColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(7, true);
+        tableView->setColumnHidden(Columns::delay, true);
     } else {
-        tableView->setColumnHidden(7, false);
+        tableView->setColumnHidden(Columns::delay, false);
     }
 }
 
 void MainWindow::setIPv4Column(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(8, true);
+        tableView->setColumnHidden(Columns::ipv4, true);
     } else {
-        tableView->setColumnHidden(8, false);
+        tableView->setColumnHidden(Columns::ipv4, false);
     }
 }
 
 void MainWindow::setIPv6Column(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(9, true);
+        tableView->setColumnHidden(Columns::ipv6, true);
     } else {
-        tableView->setColumnHidden(9, false);
+        tableView->setColumnHidden(Columns::ipv6, false);
     }
 }
 
 void MainWindow::setActiveColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(10, true);
+        tableView->setColumnHidden(Columns::active, true);
     } else {
-        tableView->setColumnHidden(10, false);
+        tableView->setColumnHidden(Columns::active, false);
     }
 }
 
 void MainWindow::setIsosColumn(int state)
 {
     if (state == Qt::Unchecked) {
-        tableView->setColumnHidden(11, true);
+        tableView->setColumnHidden(Columns::isos, true);
     } else {
-        tableView->setColumnHidden(11, false);
+        tableView->setColumnHidden(Columns::isos, false);
     }
 }
 
@@ -640,7 +641,7 @@ void MainWindow::openSaveDialog()
 void MainWindow::saveMirrorList(const QString file)
 {
     // Get 1st column (URLs) indexes of all selected rows
-    QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
+    QModelIndexList indexes = selectionModelTableView->selectedRows(Columns::url);
 
     QStringList urls;
 
@@ -653,7 +654,7 @@ void MainWindow::saveMirrorList(const QString file)
 
 void MainWindow::rankMirrorList()
 {
-    QModelIndexList indexList = selectionModelTableView->selectedRows(0);
+    //QModelIndexList indexList = selectionModelTableView->selectedRows(0);
 
     if(!selectionModelTableView->hasSelection()) {
         QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));

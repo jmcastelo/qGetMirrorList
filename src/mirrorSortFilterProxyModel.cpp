@@ -16,6 +16,7 @@
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "mirrorSortFilterProxyModel.h"
+#include "columns.h"
 #include <QDateTime>
 
 MirrorSortFilterProxyModel::MirrorSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
@@ -59,12 +60,12 @@ bool MirrorSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelI
 
 bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    QModelIndex index1 = sourceModel()->index(sourceRow, 1, sourceParent);
-    QModelIndex index2 = sourceModel()->index(sourceRow, 2, sourceParent);
-    QModelIndex index3 = sourceModel()->index(sourceRow, 8, sourceParent);
-    QModelIndex index4 = sourceModel()->index(sourceRow, 9, sourceParent);
-    QModelIndex index5 = sourceModel()->index(sourceRow, 10, sourceParent);
-    QModelIndex index6 = sourceModel()->index(sourceRow, 11, sourceParent);
+    QModelIndex index1 = sourceModel()->index(sourceRow, Columns::country, sourceParent);
+    QModelIndex index2 = sourceModel()->index(sourceRow, Columns::protocol, sourceParent);
+    QModelIndex index3 = sourceModel()->index(sourceRow, Columns::ipv4, sourceParent);
+    QModelIndex index4 = sourceModel()->index(sourceRow, Columns::ipv6, sourceParent);
+    QModelIndex index5 = sourceModel()->index(sourceRow, Columns::active, sourceParent);
+    QModelIndex index6 = sourceModel()->index(sourceRow, Columns::isos, sourceParent);
 
     QString country = sourceModel()->data(index1).toString();
     QString protocol = sourceModel()->data(index2).toString();
