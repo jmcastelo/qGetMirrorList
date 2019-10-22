@@ -49,6 +49,9 @@ void RsyncProcess::startTimer()
 
 void RsyncProcess::getSpeed(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    Q_UNUSED(exitCode)
+    Q_UNUSED(exitStatus)
+
     int timeElapsed = timer.elapsed();
     
     QFile file(path);

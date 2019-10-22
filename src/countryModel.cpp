@@ -49,6 +49,7 @@ void CountryModel::setCountryList(QList<Country> cl)
 
 int CountryModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return countryList.size();
 }
 

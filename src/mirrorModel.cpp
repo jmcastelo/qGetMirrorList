@@ -43,11 +43,13 @@ void MirrorModel::setMirrorList(QList<Mirror> ml)
 
 int MirrorModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return mirrorList.size();
 }
 
 int MirrorModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return 12; 
 }
 

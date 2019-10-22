@@ -383,6 +383,8 @@ void MainWindow::enableWidgets()
 
 void MainWindow::uncheckCornerButton(int r)
 {
+    Q_UNUSED(r)
+
     if (cornerButton->isChecked()) {
         cornerButton->setChecked(false);
     }
@@ -685,6 +687,8 @@ void MainWindow::updateMirrorList()
 
 void MainWindow::updateFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    Q_UNUSED(exitStatus)
+
     if (exitCode == 0) {
         QMessageBox::information(this, tr("Action"), tr("'/etc/pacman.d/mirrorlist' successfully updated."));
     } else {
