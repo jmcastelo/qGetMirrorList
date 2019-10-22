@@ -5,12 +5,10 @@ A tool to get and manipulate the latest Arch Linux Pacman mirror list. Its targe
 ## Dependencies
 
 Required:
-
 * Qt >= 5.13.1
 * polkit >= 0.116-2
 
 Optional:
-
 * rsync >= 3.1.3-1
 
 ## Compilation
@@ -23,11 +21,11 @@ The UI is quite self-explanatory, but a few comments can be made.
 
 ### Get and select mirrors
 
-The first thing to do is get a complete, up to date mirror list by pressing the **Get mirror list** button. Once done, the table on the right is populated with mirrors and their properties. A mirror can be selected by pressing on its row. More than one mirror can be selected, while pressing on the table's top-left corner selects and deselects all of them. The button **Show all** can be pressed to return to the complete list.
+The first thing to do is getting a complete, up to date mirror list by pressing the **Get mirror list** button. Once done, the table on the right is populated with mirrors and their properties. A mirror can be selected by pressing on its row. More than one mirror can be selected, while pressing on the table's top-left corner selects and deselects all of them. 
 
 ### Filter mirrors and table display
 
-All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. The table can display up to 12 columns which can be toggled on/off with the correspoding check boxes in the **Columns** group. The rows of the table can be sorted by pressing the columnn headers. The meaning of the least obvious columns follows:
+All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. The button **Show all** can be pressed to undo all filters and return to the complete list. The table can display up to 12 columns which can be toggled on/off with the correspoding check boxes in the **Columns** group. The rows of the table can be sorted by pressing the columnn headers. The meaning of the least obvious columns follows:
 
 * Completion percentage: The number of mirror checks that have successfully connected and disconnected from the given URL. If this is below 100%, the mirror may be unreliable.
 * Score: A very rough calculation for ranking mirrors. Lower is better. 
@@ -43,7 +41,7 @@ For information about these features and more check the [Mirror Status service](
 * **Save selected**: Saves a mirror list with the selected mirrors on a chosen file. Note that if you plan to use this list for Pacman no mirror with rscync protocol will be accepted.
 * **Update**: Copies the selected (http/https) mirrors to a mirror file with path `/etc/pacman.d/mirrorlist`, ready for pacman to use. This requires root privileges, so a suitable window appears for the user to enter his/her password.
 
-## Tip
+### Tip
 
 Get the mirror list and filter it according to your needs. Rank chosen mirrors and order them by speed. Select those you prefer and save/update the mirror list.
 
