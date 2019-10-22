@@ -352,7 +352,7 @@ void MainWindow::enableWidgets()
     if (!showAllMirrorsButton->isEnabled()) {
         showAllMirrorsButton->setEnabled(true);
     }
-    if (!updateMirrorListButton->isEnabled()) {
+    if (!updateMirrorListButton->isEnabled() && QFileInfo::exists("/usr/bin/pkexec")) {
         updateMirrorListButton->setEnabled(true);
     }
     if (!httpCheckBox->isEnabled()) {
