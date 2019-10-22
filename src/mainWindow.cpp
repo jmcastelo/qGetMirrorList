@@ -726,20 +726,19 @@ void MainWindow::about()
     aboutBox->setIconPixmap(QPixmap(":/images/logos/logo-big.png"));
     
     QStringList lines;
-    lines.append("Arch Linux - qGetMirrorList 0.1\n");
-    lines.append("Get and manipulate Arch Linux pacman mirror list.\n");
-    lines.append("Based on the online pacman Mirrorlist Generator:");
-    lines.append(" https://www.archlinux.org/mirrorlist/\n");
-    lines.append("Dependencies:");
-    lines.append(" Qt >= 5.13.1");
-    lines.append(" pacman-contrib >= 1.1.0-1");
-    lines.append(" polkit >= 0.116-2");
+    lines.append("Arch Linux - qGetMirrorList 0.2\n");
+    lines.append("Get and manipulate latest Arch Linux Pacman mirror list.\n");
+    lines.append("References:");
+    lines.append(" https://www.archlinux.org/mirrors/status/");
+    lines.append(" https://xyne.archlinux.ca/projects/reflector/\n");
+    lines.append("Required dependency: Qt >= 5.13.1");
+    lines.append("Optional dependencies: rsync >= 3.1.3, polkit >= 0.116");
 
     QString text = lines.join("\n");
 
     aboutBox->setText(text);
 
-    aboutBox->setInformativeText("Copyright 2019 Jose Maria Castelo\nLicense: GPLv3");
+    aboutBox->setInformativeText("Copyright 2019 José María Castelo Ares\nLicense: GPLv3");
     
     aboutBox->exec();
 }
