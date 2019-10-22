@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     setWindowIcon(QIcon(pixmap));
 
-    setGeometry(50, 50, 1400, 700);
+    setGeometry(50, 50, 1300, 700);
 
     // File dialog
     saveMirrorListDialog = new QFileDialog(this);
@@ -334,9 +334,9 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     layout->addWidget(urlColCheckBox);
     layout->addWidget(countryColCheckBox);
     layout->addWidget(protocolColChechBox);
+    layout->addWidget(speedColCheckBox);
     layout->addWidget(completionColChechBox);
     layout->addWidget(scoreColCheckBox);
-    layout->addWidget(speedColCheckBox);
     layout->addWidget(syncColCheckBox);
     layout->addWidget(delayColCheckBox);
     layout->addWidget(ipv4ColCheckBox);
