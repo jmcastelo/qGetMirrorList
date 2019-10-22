@@ -5,11 +5,13 @@ A tool to get and manipulate the latest Arch Linux Pacman mirror list. Its targe
 ## Dependencies
 
 Required:
+
 * Qt >= 5.13.1
-* polkit >= 0.116-2
 
 Optional:
+
 * rsync >= 3.1.3-1
+* polkit >= 0.116-2
 
 ## Compilation
 
