@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setSelectionMode(QAbstractItemView::MultiSelection);
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     tableView->horizontalHeader()->setSectionsMovable(true);
     tableView->setAlternatingRowColors(true);
     tableView->setShowGrid(false);
@@ -431,8 +431,11 @@ void MainWindow::setUrlColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(Columns::url, true);
+        tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     } else {
         tableView->setColumnHidden(Columns::url, false);
+        tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     }
 }
 
