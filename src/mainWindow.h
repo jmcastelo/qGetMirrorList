@@ -59,6 +59,8 @@ class MainWindow : public QWidget
         void setIPv6Column(int state);
         void setActiveColumn(int state);
         void setIsosColumn(int state);
+        
+        void setTableGroupTitle();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
         void filterByHttp(int state);

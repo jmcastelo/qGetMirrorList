@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     
     countryList.clear();
 
+    // Groups
     createMirrorActionsGroubBox();
     createMirrorTableGroupBox();
     createMirrorColumnSelectGroupBox();
@@ -133,6 +134,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     // Connections: various
     connect(cornerButton, &QPushButton::clicked, this, &MainWindow::selectAllMirrors);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
+    connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::setTableGroupTitle);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
     // Connections: columns
     connect(urlColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setUrlColumn);
@@ -401,7 +403,7 @@ void MainWindow::selectAllMirrors(bool state)
 {
     if (state) {
         // Get 1st column (URLs) indexes of all selected rows
-        QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
+        QModelIndexList indexes = tableView->selectionModel()->selectedRows(Columns::url);
         for (int i = 0; i < indexes.size(); i++) {
             mirrorModel->selectMirror(indexes.at(i).data().toString());
         }
@@ -425,6 +427,8 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
         url = deselected.indexes().at(0).data().toString();
         mirrorModel->deselectMirror(url);
     }
+
+    setTableGroupTitle();
 }
 
 void MainWindow::setUrlColumn(int state)
@@ -538,6 +542,28 @@ void MainWindow::setIsosColumn(int state)
     }
 }
 
+void MainWindow::setTableGroupTitle()
+{
+    int totalMirrors = mirrorModel->rowCount();
+    int filterMirrors = mirrorProxyModel->rowCount();
+    
+    int selectedMirrors = selectionModelTableView->selectedRows(Columns::url).size();
+    
+    if (filterMirrors == totalMirrors) {
+        if (selectedMirrors == 0) {
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Total %1]").arg(totalMirrors));
+        } else {
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %2 | Total %1]").arg(totalMirrors).arg(selectedMirrors));
+        }
+    } else {
+        if (selectedMirrors == 0) {
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors));
+        } else {
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors));
+        }
+    }
+}
+
 void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QModelIndexList items = selected.indexes();
@@ -553,6 +579,8 @@ void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSele
     }
 
     tableView->resizeColumnToContents(Columns::country);
+
+    setTableGroupTitle();
 }
 
 void MainWindow::filterByHttp(int state)
@@ -567,6 +595,7 @@ void MainWindow::filterByHttp(int state)
         } else {
             mirrorProxyModel->removeProtocolFilter("http");
         }
+        setTableGroupTitle();
     }
 }
 
@@ -582,6 +611,7 @@ void MainWindow::filterByHttps(int state)
         } else {
             mirrorProxyModel->removeProtocolFilter("https");
         }
+        setTableGroupTitle();
     }
 }
 
@@ -597,17 +627,20 @@ void MainWindow::filterByRsync(int state)
         } else {
             mirrorProxyModel->removeProtocolFilter("rsync");
         }
+        setTableGroupTitle();
     }
 }
 
 void MainWindow::filterByActive(int state)
 {
     mirrorProxyModel->setActiveFilter(state);
+    setTableGroupTitle();
 }
 
 void MainWindow::filterByIsos(int state)
 {
     mirrorProxyModel->setIsosFilter(state);
+    setTableGroupTitle();
 }
 
 void MainWindow::filterByIPv4(int state)
@@ -616,6 +649,7 @@ void MainWindow::filterByIPv4(int state)
         ipv4CheckBox->setCheckState(Qt::Checked);
     } else {
         mirrorProxyModel->setIPv4Filter(state);
+        setTableGroupTitle();
     }
 }
 
@@ -625,6 +659,7 @@ void MainWindow::filterByIPv6(int state)
         ipv6CheckBox->setCheckState(Qt::Checked);
     } else {
         mirrorProxyModel->setIPv6Filter(state);
+        setTableGroupTitle();
     }
 }
 
