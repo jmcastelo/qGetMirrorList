@@ -307,17 +307,19 @@ void RankingPerformer::getSpeed(int index, QString url, double speed)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    checkIfFinished();    
-
     disconnect(rsyncProcesses.at(index), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
 
-    rsyncProcesses.removeAt(index);
+    checkIfFinished();
 }
 
 void RankingPerformer::checkIfFinished()
 {
     if (nFinishedRequests == nRequests) {
+
         emit finished(kibps);
+
+        rsyncProcesses.clear();
+
         if (!errorMessage.isEmpty()) {
             emit errors(errorMessage);
         }

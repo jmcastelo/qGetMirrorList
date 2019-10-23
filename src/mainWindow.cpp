@@ -400,6 +400,8 @@ void MainWindow::uncheckCornerButton(int r)
     if (cornerButton->isChecked()) {
         cornerButton->setChecked(false);
     }
+
+    setTableGroupTitle();
 }
 
 void MainWindow::selectAllMirrors(bool state)
