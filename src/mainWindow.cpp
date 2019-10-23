@@ -165,6 +165,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, this, &MainWindow::uncheckCornerButton);
     connect(mirrorModel, &MirrorModel::setProgressBarMax, rankingProgressBar, &QProgressBar::setMaximum);
     connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsErrors, this, &MainWindow::showRankingErrorsDialog);
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
@@ -788,4 +789,9 @@ void MainWindow::mirrorListNetworkError(QNetworkReply::NetworkError error)
 {
     QString message = QString("Error getting JSON data.\nError code %1.").arg(error);
     QMessageBox::critical(this, tr("Error"), message);
+}
+
+void MainWindow::showRankingErrorsDialog(QString errorMessage)
+{
+    QMessageBox::critical(this, tr("Error ranking following mirrors"), errorMessage);
 }

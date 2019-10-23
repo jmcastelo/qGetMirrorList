@@ -50,6 +50,7 @@ class MirrorModel : public QAbstractTableModel
         void mirrorListNetworkError(QNetworkReply::NetworkError error);
         void rankingMirrorsStarted();
         void rankingMirrorsFinished(int r);
+        void rankingMirrorsErrors(QString errorMessage);
         void setProgressBarMax(int max);
         void setProgressBarValue(int value);
         void updateMirrorListFinished(int exitCode, QProcess::ExitStatus exitStatus);

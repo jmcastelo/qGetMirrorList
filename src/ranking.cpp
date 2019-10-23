@@ -21,6 +21,7 @@
 RsyncProcess::RsyncProcess (QObject *parent): QObject(parent)
 {
     connect(&rsync, &QProcess::started, this, &RsyncProcess::startTimer);
+    connect(&rsync, &QProcess::errorOccurred, this, &RsyncProcess::processError);
     connect(&rsync, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &RsyncProcess::getSpeed);
 }
 
@@ -49,24 +50,120 @@ void RsyncProcess::startTimer()
 
 void RsyncProcess::getSpeed(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    Q_UNUSED(exitCode)
-    Q_UNUSED(exitStatus)
+    if (exitStatus == QProcess::NormalExit) {
+        if (exitCode == 0) {
+            int timeElapsed = timer.elapsed();
 
-    int timeElapsed = timer.elapsed();
-    
-    QFile file(path);
-    qint64 fileSize = file.size();
-    file.remove();
+            QFile file(path);
+            qint64 fileSize = file.size();
+            file.remove();
 
-    double speed = 1000.0*fileSize/(1024.0*timeElapsed);
+            double speed = 1000.0*fileSize/(1024.0*timeElapsed);
 
-    emit processFinished(index, url, speed); 
+            emit processFinished(index, url, speed);
+        } else {
+            
+            emit processFailed(index, url, getRsyncError(exitCode));
+        }
+    } else {
+        emit processFailed(index, url, QString("rsync crashed"));
+    }
+}
+
+QString RsyncProcess::getRsyncError(int exitCode)
+{
+    QString errorMessage;
+
+    switch (exitCode) {
+        case 1:
+            errorMessage = "Syntax or usage error";
+            break;
+        case 2:
+            errorMessage = "Protocol incompatibility";
+            break;
+        case 3:
+            errorMessage = "Errors selecting input/output files, dirs";
+            break;
+        case 4:
+            errorMessage = "Requested action not supported";
+            break;
+        case 5:
+            errorMessage = "Error starting client-server protocol";
+            break;
+        case 6:
+            errorMessage = "Daemon unable to append to log-file";
+            break;
+        case 10:
+            errorMessage = "Error in socket I/O";
+            break;
+        case 11:
+            errorMessage = "Error in file I/O";
+            break;
+        case 12:
+            errorMessage = "Error in rsync protocol data stream";
+            break;
+        case 13:
+            errorMessage = "Errors with program diagnostics";
+            break;
+        case 14:
+            errorMessage = "Error in IPC code";
+            break;
+        case 20:
+            errorMessage = "Received SIGUSR1 or SIGINT";
+            break;
+        case 21:
+            errorMessage = "Some error returned by waitpid()";
+            break;
+        case 22:
+            errorMessage = "Error allocating core memory buffers";
+            break;
+        case 23:
+            errorMessage = "Partial transfer due to error";
+            break;
+        case 24:
+            errorMessage = "Partial transfer due to vanished source files";
+            break;
+        case 25:
+            errorMessage = "The --max-delete limit stopped deletions";
+            break;
+        case 30:
+            errorMessage = "Timeout in data send/receive";
+            break;
+        case 35:
+            errorMessage = "Timeout waiting for daemon connection";
+            break;
+        default:
+            errorMessage = QString("Error code %1").arg(exitCode);
+    }
+
+    return errorMessage;
+}
+
+void RsyncProcess::processError(QProcess::ProcessError error)
+{
+    QString errorMessage;
+
+    switch (error) {
+        case QProcess::FailedToStart:
+            errorMessage = "rsync failed to start";
+            break;
+        case QProcess::Crashed:
+            errorMessage = "rsync crashed";
+            break;
+        case QProcess::Timedout:
+            errorMessage = "rsync timed out";
+            break;
+        default:
+            errorMessage = "rsync error";
+    }
+
+    emit processFailed(index, url, errorMessage);
 }
 
 RankingPerformer::RankingPerformer(QObject *parent) : QObject(parent)
 {
     dbSubPath = "core/os/x86_64/core.db";
-    connectionTimeout = 10000; // 10 seconds
+    connectionTimeout = 5000; // 5 seconds
 
     connect(&manager, &QNetworkAccessManager::finished, this, &RankingPerformer::requestFinished);
 }
@@ -87,6 +184,8 @@ QStringList RankingPerformer::getByProtocol(QString protocol, QStringList urls)
 void RankingPerformer::rank(QStringList mirrorUrls)
 {
     nFinishedRequests = 0;
+
+    errorMessage.clear();
 
     QStringList httpUrls = getByProtocol("http", mirrorUrls);
 
@@ -120,7 +219,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
             rsyncProcesses.at(i)->init(i, url, connectionTimeout);
 
             connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
-
+            connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rankingFailed);
             rsyncProcesses.at(i)->start();
         }
     }
@@ -142,9 +241,7 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    if (nFinishedRequests == nRequests) {
-        emit finished(kibps);
-    }
+    checkIfFinished();
     
     reply->deleteLater();
 }
@@ -159,9 +256,30 @@ void RankingPerformer::getSpeed(int index, QString url, double speed)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    if (nFinishedRequests == nRequests) {
-        emit finished(kibps);
-    }
+    checkIfFinished();    
 
     disconnect(rsyncProcesses.at(index), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
+
+    rsyncProcesses.removeAt(index);
+}
+
+void RankingPerformer::checkIfFinished()
+{
+    if (nFinishedRequests == nRequests) {
+        emit finished(kibps);
+        if (!errorMessage.isEmpty()) {
+            emit errors(errorMessage);
+        }
+    }
+}
+
+void RankingPerformer::rankingFailed(int index, QString url, QString message)
+{
+    QString baseUrl = url.replace(dbSubPath, QString(""));
+    
+    QString msg = QString("%1\n%2\n\n").arg(baseUrl).arg(message);
+
+    errorMessage.append(msg);
+
+    getSpeed(index, baseUrl, 0.0);
 }

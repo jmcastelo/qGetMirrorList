@@ -38,10 +38,12 @@ class RsyncProcess : public QObject
 
     signals:
         void processFinished(int index, QString url, double speed);
+        void processFailed(int index, QString url, QString message);
 
     private slots:
         void startTimer();
         void getSpeed(int exitCode, QProcess::ExitStatus exitStatus);
+        void processError(QProcess::ProcessError error);
 
     private:
         int index;
@@ -51,6 +53,7 @@ class RsyncProcess : public QObject
         QTime timer;
         double speed;
         QProcess rsync;
+        QString getRsyncError(int exitCode);
 };
 
 class RankingPerformer : public QObject
@@ -65,10 +68,12 @@ class RankingPerformer : public QObject
         void started(int max);
         void oneMirrorRanked(int value);
         void finished(QMap<QString, double> speeds);
+        void errors(QString errorMessage);
 
     private slots:
         void requestFinished(QNetworkReply *reply);
         void getSpeed(int index, QString url, double speed);
+        void rankingFailed(int index, QString url, QString message);
 
     private:
         QNetworkAccessManager manager;
@@ -85,6 +90,10 @@ class RankingPerformer : public QObject
         QMap<QString, double> kibps;
 
         QStringList getByProtocol(QString protocol, QStringList urls);
+
+        void checkIfFinished();
+
+        QString errorMessage;
 };
 
 class ReplyTimeout : public QObject

@@ -74,6 +74,7 @@ class MainWindow : public QWidget
         void saveMirrorList(const QString file);
         
         void rankMirrorList();
+        void showRankingErrorsDialog(QString errorMessage);
         
         void updateMirrorList();
         void updateFinished(int exitCode, QProcess::ExitStatus exitStatus);
