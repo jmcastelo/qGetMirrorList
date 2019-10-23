@@ -49,7 +49,7 @@ Get the mirror list and filter it according to your needs, e.g. select mirrors i
 
 ## Screenshot
 
-![Screenshot](https://i.imgur.com/imvlcVI.png)
+![Screenshot](https://i.imgur.com/DQpEn9j.png)
 
 ## Credits
 
