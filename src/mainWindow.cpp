@@ -548,6 +548,8 @@ void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSele
     for (const QModelIndex &index : qAsConst(items)) {
         mirrorProxyModel->removeCountryFilter(index.data().toString());
     }
+
+    tableView->resizeColumnToContents(Columns::country);
 }
 
 void MainWindow::filterByHttp(int state)
