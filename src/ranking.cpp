@@ -168,7 +168,7 @@ RankingPerformer::RankingPerformer(QObject *parent) : QObject(parent)
     connect(&manager, &QNetworkAccessManager::finished, this, &RankingPerformer::requestFinished);
 }
 
-QStringList RankingPerformer::getByProtocol(QString protocol, QStringList urls)
+QStringList RankingPerformer::getUrlsByProtocol(QString protocol, QStringList urls)
 {
     QStringList filteredUrls;
 
@@ -187,7 +187,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
 
     errorMessage.clear();
 
-    QStringList httpUrls = getByProtocol("http", mirrorUrls);
+    QStringList httpUrls = getUrlsByProtocol("http", mirrorUrls);
 
     nRequests = httpUrls.size();
 
@@ -204,7 +204,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
     }
 
     if (QFileInfo::exists("/usr/bin/rsync")) {
-        QStringList rsyncUrls = getByProtocol("rsync", mirrorUrls);
+        QStringList rsyncUrls = getUrlsByProtocol("rsync", mirrorUrls);
         
         nRequests += rsyncUrls.size();
 
@@ -220,6 +220,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
 
             connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
             connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rankingFailed);
+
             rsyncProcesses.at(i)->start();
         }
     }
@@ -231,11 +232,21 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
 {
     QString url = reply->url().toString().replace(dbSubPath, QString(""));
 
-    int timeElapsed = timers[url].elapsed();
-    
-    QByteArray data = reply->readAll();
+    if (reply->error() == QNetworkReply::NoError) {
+        int timeElapsed = timers[url].elapsed();
 
-    kibps[url] = 1000.0*data.size()/(1024.0*timeElapsed);
+        QByteArray data = reply->readAll();
+
+        kibps[url] = 1000.0*data.size()/(1024.0*timeElapsed);
+    } else {
+        QString message = getReplyErrorMessage(reply->error());
+        
+        QString msg = QString("%1\n%2\n\n").arg(url).arg(message);
+
+        errorMessage.append(msg);
+    }
+    
+    timers.remove(url);
 
     nFinishedRequests++;
 
@@ -244,6 +255,46 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
     checkIfFinished();
     
     reply->deleteLater();
+}
+
+QString RankingPerformer::getReplyErrorMessage(QNetworkReply::NetworkError error)
+{
+    QString message;
+
+    switch (error) {
+        case QNetworkReply::ConnectionRefusedError:
+            message = "Connection refused";
+            break;
+        case QNetworkReply::RemoteHostClosedError:
+            message = "Remote host closed connection";
+            break;
+        case QNetworkReply::HostNotFoundError:
+            message = "Host not found";
+            break;
+        case QNetworkReply::TimeoutError:
+        case QNetworkReply::OperationCanceledError:
+            message = "Connection timed out";
+            break;
+        case QNetworkReply::NetworkSessionFailedError:
+            message = "Connection broken";
+            break;
+        case QNetworkReply::ContentAccessDenied:
+            message = "Access to remote content denied (403)";
+            break;
+        case QNetworkReply::ContentNotFoundError:
+            message = "Content not found (404)";
+            break;
+        case QNetworkReply::ServiceUnavailableError:
+            message = "Service unavailable";
+            break;
+        case QNetworkReply::UnknownServerError:
+            message = "Unknown server error";
+            break;
+        default:
+            message = "Connection error";
+    }
+    
+    return message;
 }
 
 void RankingPerformer::getSpeed(int index, QString url, double speed)
@@ -281,5 +332,5 @@ void RankingPerformer::rankingFailed(int index, QString url, QString message)
 
     errorMessage.append(msg);
 
-    getSpeed(index, baseUrl, 0.0);
+    getSpeed(index, url, 0.0);
 }

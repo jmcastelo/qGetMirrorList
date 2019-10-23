@@ -89,7 +89,8 @@ class RankingPerformer : public QObject
         QMap<QString, QTime> timers;
         QMap<QString, double> kibps;
 
-        QStringList getByProtocol(QString protocol, QStringList urls);
+        QStringList getUrlsByProtocol(QString protocol, QStringList urls);
+        QString getReplyErrorMessage(QNetworkReply::NetworkError error);
 
         void checkIfFinished();
 
