@@ -83,6 +83,8 @@ class MainWindow : public QWidget
         void openSaveDialog();
         
         void about();
+        
+        void mirrorListNetworkError(QNetworkReply::NetworkError error);
 
     private:
         MirrorModel *mirrorModel;

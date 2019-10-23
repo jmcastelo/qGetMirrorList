@@ -22,6 +22,7 @@ MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
     // Connections
     connect(&theMirrorManager, &MirrorManager::mirrorListReady, this, &MirrorModel::setMirrorList);
+    connect(&theMirrorManager, &MirrorManager::networkReplyError, this, &MirrorModel::mirrorListNetworkError);
     connect(&ranker, &RankingPerformer::started, this, &MirrorModel::setProgressBarMax);
     connect(&ranker, &RankingPerformer::oneMirrorRanked, this, &MirrorModel::setProgressBarValue);
     connect(&ranker, &RankingPerformer::finished, this, &MirrorModel::setMirrorSpeeds);

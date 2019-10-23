@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     setWindowIcon(QIcon(pixmap));
 
-    setGeometry(50, 50, 1300, 700);
+    setGeometry(0, 0, 1300, 700);
 
     // File dialog
     saveMirrorListDialog = new QFileDialog(this);
@@ -170,6 +170,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
     connect(mirrorModel, &MirrorModel::noHttpMirrorSelected, this, &MainWindow::showHttpDialog);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
+    // Connections: network errors
+    connect(mirrorModel, &MirrorModel::mirrorListNetworkError, this, &MainWindow::mirrorListNetworkError);
 }
 
 void MainWindow::createMirrorActionsGroubBox()
@@ -729,7 +731,6 @@ void MainWindow::updateMirrorList()
 
         mirrorModel->updateMirrorList(urls);
     }
-    
 }
 
 void MainWindow::updateFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -781,4 +782,10 @@ void MainWindow::about()
     aboutBox->setInformativeText("Copyright 2019 José María Castelo Ares\nLicense: GPLv3");
     
     aboutBox->exec();
+}
+
+void MainWindow::mirrorListNetworkError(QNetworkReply::NetworkError error)
+{
+    QString message = QString("Error getting JSON data.\nError code %1.").arg(error);
+    QMessageBox::critical(this, tr("Error"), message);
 }

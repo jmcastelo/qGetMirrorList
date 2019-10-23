@@ -31,9 +31,13 @@ void Network::getRequest(QUrl url)
 
 void Network::readData(QNetworkReply *reply)
 {
-    data = reply->readAll();
-    reply->deleteLater();
-    emit dataRead();
+    if (reply->error() == QNetworkReply::NoError) {
+        data = reply->readAll();
+        reply->deleteLater();
+        emit dataRead();
+    } else {
+        emit networkReplyError(reply->error());
+    }
 }
 
 QByteArray Network::getData() const

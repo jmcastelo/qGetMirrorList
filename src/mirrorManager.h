@@ -37,6 +37,7 @@ class MirrorManager : public QObject
     signals:
         void mirrorListReady(QList<Mirror> mirrorList);
         void countryListReady(QList<Country> countryList);
+        void networkReplyError(QNetworkReply::NetworkError error);
 
     private slots:
         void getParsedData();

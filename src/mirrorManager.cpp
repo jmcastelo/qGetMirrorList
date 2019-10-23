@@ -23,6 +23,7 @@ MirrorManager::MirrorManager()
     url = "https://www.archlinux.org/mirrors/status/json/";
 
     connect(&theNetwork, &Network::dataRead, this, &MirrorManager::getParsedData);
+    connect(&theNetwork, &Network::networkReplyError, this, &MirrorManager::networkReplyError);
 }
 
 // Parse fetched mirror list according to Url

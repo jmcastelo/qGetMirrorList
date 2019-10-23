@@ -35,6 +35,7 @@ class Network : public QObject
 
     signals:
         void dataRead();
+        void networkReplyError(QNetworkReply::NetworkError error);
 
     private slots:
         void readData(QNetworkReply *reply);
