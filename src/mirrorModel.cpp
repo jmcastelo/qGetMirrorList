@@ -67,7 +67,7 @@ QVariant MirrorModel::data(const QModelIndex &index, int role) const
     QPixmap cross(":/images/icons/cross.png");
 
     if (role == Qt::DecorationRole) {
-        if (col == 1) {
+        if (col == Columns::country) {
             return mirrorList.at(row).flag;
         } else if (col == Columns::ipv4) {
             if (mirrorList.at(row).ipv4) {
@@ -172,26 +172,18 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
 
 void MirrorModel::selectAllMirrors(bool selected)
 {
-    for (int i = 0; i< mirrorList.size(); i++) {
-        mirrorList[i].selected = selected;
+    QList<Mirror>::iterator mirror;
+    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
+        mirror->selected = selected;
     }
 }
 
-void MirrorModel::selectMirror(QString url)
+void MirrorModel::selectMirror(QString url, bool selected)
 {
-    for (int i = 0; i < mirrorList.size(); i++) {
-        if (mirrorList.at(i).url == url) {
-            mirrorList[i].selected = true;
-            break;
-        }
-    }
-}
-
-void MirrorModel::deselectMirror(QString url)
-{
-    for (int i = 0; i < mirrorList.size(); i++) {
-        if (mirrorList.at(i).url == url) {
-            mirrorList[i].selected = false;
+    QList<Mirror>::iterator mirror;
+    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
+        if (mirror->url == url) {
+            mirror->selected = selected;
             break;
         }
     }
@@ -220,19 +212,6 @@ void MirrorModel::saveMirrorList(const QString file, bool allowRsync, QStringLis
     }
 }
 
-int MirrorModel::countSelectedMirrors()
-{
-    int nSelected = 0;
-
-    for (int i = 0; i < mirrorList.size(); i++) {
-        if (mirrorList.at(i).selected) {
-            nSelected++;
-        }
-    }
-
-    return nSelected;
-}
-
 void MirrorModel::rankMirrorList()
 {
     QStringList mirrorUrls;
@@ -251,9 +230,10 @@ void MirrorModel::rankMirrorList()
 void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
 {
     beginResetModel();
-    for (int i = 0; i < mirrorList.size(); i++) {
-        mirrorList[i].speed = speeds.value(mirrorList.at(i).url, mirrorList.at(i).speed);
-        mirrorList[i].selected = false;
+    QList<Mirror>::iterator mirror;
+    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
+        mirror->speed = speeds.value(mirror->url, mirror->speed);
+        mirror->selected = false;
     }
     endResetModel();
 
@@ -262,12 +242,12 @@ void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
 
 bool MirrorModel::httpMirrorSelected()
 {
-    for (int i = 0; i < mirrorList.size(); i++) {
-        if (mirrorList.at(i).selected && mirrorList.at(i).url.startsWith("http")) {
+    QList<Mirror>::const_iterator mirror;
+    for (mirror = mirrorList.constBegin(); mirror != mirrorList.constEnd(); ++mirror) {
+        if (mirror->selected && mirror->url.startsWith("http")) {
             return true;
         }
     }
-
     return false;
 }
 

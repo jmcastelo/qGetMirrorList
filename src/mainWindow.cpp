@@ -411,10 +411,12 @@ void MainWindow::uncheckCornerButton(int r)
 void MainWindow::selectAllMirrors(bool state)
 {
     if (state) {
-        // Get 1st column (URLs) indexes of all selected rows
+        // Get URL column indexes of all selected rows
         QModelIndexList indexes = tableView->selectionModel()->selectedRows(Columns::url);
-        for (int i = 0; i < indexes.size(); i++) {
-            mirrorModel->selectMirror(indexes.at(i).data().toString());
+
+        QList<QModelIndex>::const_iterator index;
+        for (index = indexes.constBegin(); index != indexes.constEnd(); ++index) {
+            mirrorModel->selectMirror(index->data().toString(), true);
         }
     } else {
         // Indiscriminately deselect all mirrors
@@ -429,12 +431,12 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
 
     if (!selected.indexes().isEmpty()) {
         url = selected.indexes().at(0).data().toString();
-        mirrorModel->selectMirror(url);
+        mirrorModel->selectMirror(url, true);
     }
     
     if (!deselected.indexes().isEmpty()) {
         url = deselected.indexes().at(0).data().toString();
-        mirrorModel->deselectMirror(url);
+        mirrorModel->selectMirror(url, false);
     }
 
     setTableGroupTitle();
@@ -444,9 +446,11 @@ void MainWindow::setUrlColumn(int state)
 {
     if (state == Qt::Unchecked) {
         tableView->setColumnHidden(Columns::url, true);
+        // Change resize mode for the rest of the columns to stretch all available space
         tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     } else {
         tableView->setColumnHidden(Columns::url, false);
+        // Reset resize mode
         tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     }

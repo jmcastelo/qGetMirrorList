@@ -41,8 +41,9 @@ void MirrorParser::parseMirrorList()
     oneMirror.selected = false;
     oneMirror.speed = 0.0;
 
-    for (const QJsonValue value : jsonMirrorArray) {
-        QJsonObject loopObject = value.toObject();
+    QJsonArray::const_iterator value;
+    for (value = jsonMirrorArray.constBegin(); value != jsonMirrorArray.constEnd(); ++value) {
+        QJsonObject loopObject = value->toObject();
 
         oneMirror.url = loopObject["url"].toString();
         oneMirror.protocol = loopObject["protocol"].toString();
@@ -54,11 +55,10 @@ void MirrorParser::parseMirrorList()
         oneMirror.score = loopObject["score"].toDouble();
         oneMirror.active = loopObject["active"].toBool();
         oneMirror.country = getCountry(loopObject["country"].toString());
-        oneMirror.country_code = loopObject["country_code"].toString().toLower();
         oneMirror.isos = loopObject["isos"].toBool();
         oneMirror.ipv4 = loopObject["ipv4"].toBool();
         oneMirror.ipv6 = loopObject["ipv6"].toBool();
-        oneMirror.flag = getFlag(oneMirror.country_code);
+        oneMirror.flag = getFlag(loopObject["country_code"].toString().toLower());
 
         mirrorList.append(oneMirror);
     }
@@ -112,15 +112,18 @@ void MirrorParser::parseCountries()
 
     countryList.clear();
 
-    for (const QJsonValue &value : jsonMirrorArray) {
-        QJsonObject loopObject = value.toObject();
+    QJsonArray::const_iterator value;
+    for (value = jsonMirrorArray.constBegin(); value != jsonMirrorArray.constEnd(); ++value) {
+        QJsonObject loopObject = value->toObject();
         
-        oneCountry.name = getCountry(loopObject["country"].toString());
-        oneCountry.code = loopObject["country_code"].toString().toLower();
-        oneCountry.flag = getFlag(oneCountry.code);
+        QString countryName = getCountry(loopObject["country"].toString());
 
-        if (!uniqueCountryList.contains(oneCountry.name)) {
-            uniqueCountryList.append(oneCountry.name);
+        if (!uniqueCountryList.contains(countryName)) {
+            uniqueCountryList.append(countryName);
+
+            oneCountry.name = countryName;
+            oneCountry.flag = getFlag(loopObject["country_code"].toString().toLower());
+
             countryList.append(oneCountry);
         }
     }

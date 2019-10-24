@@ -16,18 +16,18 @@
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "countryModel.h"
+#include <algorithm>
+
+bool comparator(Country &c1, Country &c2)
+{
+    return c1.name.compare(c2.name) < 0;
+}
 
 CountryModel::CountryModel(QObject *parent) : QAbstractListModel(parent) {}
 
 void CountryModel::sortCountryList()
 {
-    for (int i = 0; i < countryList.size(); i++) {
-        for (int j = i+1; j < countryList.size(); j++) {
-            if (countryList.at(j).name.compare(countryList.at(i).name) < 0) {
-                countryList.swapItemsAt(i, j);
-            }
-        }
-    }
+    std::sort(countryList.begin(), countryList.end(), comparator);
 }
 
 void CountryModel::setCountryList(QList<Country> cl)

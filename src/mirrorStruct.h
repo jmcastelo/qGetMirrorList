@@ -35,7 +35,7 @@ struct Mirror
     double score;
     bool active;
     QString country;
-    QString country_code;
+    //QString country_code;
     bool isos;
     bool ipv4;
     bool ipv6;
@@ -47,7 +47,6 @@ struct Mirror
 struct Country
 {
     QString name;
-    QString code;
     QPixmap flag;
 };
 
