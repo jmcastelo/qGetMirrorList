@@ -46,7 +46,6 @@ class MainWindow : public QWidget
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
         void selectAllMirrors(bool state);
         void showAllMirrors();
-        void uncheckCornerButton(int r);
 
         void setUrlColumn(int state);
         void setCountryColumn(int state);

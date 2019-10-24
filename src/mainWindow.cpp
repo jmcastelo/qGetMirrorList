@@ -166,7 +166,6 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, rankingProgressBar, &QProgressBar::reset);
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, waitForRankingDialog, &QDialog::done);
-    connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, this, &MainWindow::uncheckCornerButton);
     connect(mirrorModel, &MirrorModel::setProgressBarMax, rankingProgressBar, &QProgressBar::setMaximum);
     connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
     connect(mirrorModel, &MirrorModel::rankingMirrorsErrors, this, &MainWindow::showRankingErrorsDialog);
@@ -397,22 +396,11 @@ void MainWindow::enableWidgets()
     mirrorProxyModel->setLeastRestrictiveFilter();
 }
 
-void MainWindow::uncheckCornerButton(int r)
-{
-    Q_UNUSED(r)
-
-    if (cornerButton->isChecked()) {
-        cornerButton->setChecked(false);
-    }
-
-    setTableGroupTitle();
-}
-
 void MainWindow::selectAllMirrors(bool state)
 {
     if (state) {
         // Get URL column indexes of all selected rows
-        QModelIndexList indexes = tableView->selectionModel()->selectedRows(Columns::url);
+        QModelIndexList indexes = selectionModelTableView->selectedRows(Columns::url);
 
         QList<QModelIndex>::const_iterator index;
         for (index = indexes.constBegin(); index != indexes.constEnd(); ++index) {
@@ -437,6 +425,7 @@ void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelect
     if (!deselected.indexes().isEmpty()) {
         url = deselected.indexes().at(0).data().toString();
         mirrorModel->selectMirror(url, false);
+        cornerButton->setChecked(false);
     }
 
     setTableGroupTitle();
