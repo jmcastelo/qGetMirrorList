@@ -20,18 +20,20 @@
 
 namespace Columns
 {
-    const int url = 0;
-    const int country = 1;
-    const int protocol = 2;
-    const int speed = 3;
-    const int completion_pct = 4;
-    const int score = 5;
-    const int last_sync = 6;
-    const int delay = 7;
-    const int ipv4 = 8;
-    const int ipv6 = 9;
-    const int active = 10;
-    const int isos = 11;
+    enum {
+        url,
+        country,
+        protocol,
+        speed,
+        completion_pct,
+        score,
+        last_sync,
+        delay,
+        ipv4,
+        ipv6,
+        active,
+        isos
+    };
 }
 
 #endif
