@@ -713,8 +713,6 @@ void MainWindow::saveMirrorList(const QString file)
 
 void MainWindow::rankMirrorList()
 {
-    //QModelIndexList indexList = selectionModelTableView->selectedRows(0);
-
     if(!selectionModelTableView->hasSelection()) {
         QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
     } else {
@@ -725,7 +723,7 @@ void MainWindow::rankMirrorList()
 void MainWindow::updateMirrorList()
 {
     if(!selectionModelTableView->hasSelection()) {
-        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
+        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one http/https mirror."));
     } else {
         // Get 1st column (URLs) indexes of all selected rows
         QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);

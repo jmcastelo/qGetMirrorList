@@ -41,7 +41,7 @@ void MirrorParser::parseMirrorList()
     oneMirror.selected = false;
     oneMirror.speed = 0.0;
 
-    for (const QJsonValue &value : jsonMirrorArray) {
+    for (const QJsonValue value : jsonMirrorArray) {
         QJsonObject loopObject = value.toObject();
 
         oneMirror.url = loopObject["url"].toString();

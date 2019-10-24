@@ -18,7 +18,6 @@
 #ifndef RANKING_H
 #define RANKING_H
 
-//#include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -32,7 +31,7 @@ class RsyncProcess : public QObject
     Q_OBJECT
 
     public:
-        RsyncProcess(QObject *parent);
+        RsyncProcess(QObject *parent = nullptr);
         void init(int i, QString oneUrl, int theTimeout);
         void start();
 
@@ -61,7 +60,7 @@ class RankingPerformer : public QObject
     Q_OBJECT
 
     public:
-        RankingPerformer(QObject *parent = 0);
+        RankingPerformer(QObject *parent = nullptr);
         void rank(QStringList mirrorUrls);
 
     signals:
@@ -79,7 +78,8 @@ class RankingPerformer : public QObject
         QNetworkAccessManager manager;
         
         QString dbSubPath;
-        int connectionTimeout;
+        int httpConnectionTimeout;
+        int rsyncConnectionTimeout;
         
         int nRequests;
         int nFinishedRequests;

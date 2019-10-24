@@ -162,8 +162,10 @@ void RsyncProcess::processError(QProcess::ProcessError error)
 
 RankingPerformer::RankingPerformer(QObject *parent) : QObject(parent)
 {
-    dbSubPath = "core/os/x86_64/core.db";
-    connectionTimeout = 5000; // 5 seconds
+    dbSubPath = "extra/os/x86_64/extra.db";
+    //dbSubPath = "core/os/x86_64/core.db";
+    httpConnectionTimeout = 30000; // 30 seconds
+    rsyncConnectionTimeout = 5000; // 5 seconds
 
     connect(&manager, &QNetworkAccessManager::finished, this, &RankingPerformer::requestFinished);
 }
@@ -200,7 +202,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
 
         QNetworkReply *reply = manager.get(QNetworkRequest(QUrl(httpUrls[i].append(dbSubPath))));
         
-        ReplyTimeout::set(reply, connectionTimeout);
+        ReplyTimeout::set(reply, httpConnectionTimeout);
     }
 
     if (QFileInfo::exists("/usr/bin/rsync")) {
@@ -216,7 +218,7 @@ void RankingPerformer::rank(QStringList mirrorUrls)
 
             rsyncProcesses.append(new RsyncProcess(this));
         
-            rsyncProcesses.at(i)->init(i, url, connectionTimeout);
+            rsyncProcesses.at(i)->init(i, url, rsyncConnectionTimeout);
 
             connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
             connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rankingFailed);
@@ -233,11 +235,19 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
     QString url = reply->url().toString().replace(dbSubPath, QString(""));
 
     if (reply->error() == QNetworkReply::NoError) {
-        int timeElapsed = timers[url].elapsed();
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-        QByteArray data = reply->readAll();
+        if (statusCode == 200) {
+            int timeElapsed = timers[url].elapsed();
 
-        kibps[url] = 1000.0*data.size()/(1024.0*timeElapsed);
+            QByteArray data = reply->readAll();
+
+            kibps[url] = 1000.0*data.size()/(1024.0*timeElapsed);
+        } else {
+            QString reason = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+
+            errorMessage.append(QString("%1\n%2: %3\n\n").arg(url).arg(statusCode).arg(reason));
+        }
     } else {
         QString message = getReplyErrorMessage(reply->error());
         
@@ -272,8 +282,10 @@ QString RankingPerformer::getReplyErrorMessage(QNetworkReply::NetworkError error
             message = "Host not found";
             break;
         case QNetworkReply::TimeoutError:
-        case QNetworkReply::OperationCanceledError:
             message = "Connection timed out";
+            break;
+        case QNetworkReply::OperationCanceledError:
+            message = QString("Operation took more than %1 seconds").arg(httpConnectionTimeout/1000);
             break;
         case QNetworkReply::NetworkSessionFailedError:
             message = "Connection broken";
