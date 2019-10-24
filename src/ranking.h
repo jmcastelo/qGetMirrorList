@@ -32,17 +32,18 @@ class RsyncProcess : public QObject
 
     public:
         RsyncProcess(QObject *parent = nullptr);
+        QProcess rsync;
         void init(int i, QString oneUrl, int theTimeout);
         void start();
 
     signals:
         void processFinished(int index, QString url, double speed);
         void processFailed(int index, QString url, QString message);
+        void processCancelled(int index);
 
     private slots:
         void startTimer();
         void getSpeed(int exitCode, QProcess::ExitStatus exitStatus);
-        void processError(QProcess::ProcessError error);
 
     private:
         int index;
@@ -51,7 +52,6 @@ class RsyncProcess : public QObject
         QString path;
         QTime timer;
         double speed;
-        QProcess rsync;
         QString getRsyncError(int exitCode);
 };
 
@@ -68,23 +68,26 @@ class RankingPerformer : public QObject
         void oneMirrorRanked(int value);
         void finished(QMap<QString, double> speeds);
         void errors(QString errorMessage);
+        void cancelRanking();
 
     private slots:
         void requestFinished(QNetworkReply *reply);
-        void getSpeed(int index, QString url, double speed);
-        void rankingFailed(int index, QString url, QString message);
+        void rsyncFinished(int index, QString url, double speed);
+        void rsyncFailed(int index, QString url, QString message);
+        void rsyncCancelled(int index);
 
     private:
         QNetworkAccessManager manager;
         
         QString dbSubPath;
-        int httpConnectionTimeout;
         int rsyncConnectionTimeout;
         
         int nRequests;
         int nFinishedRequests;
         
         QList<RsyncProcess*> rsyncProcesses;
+
+        QMap<QString, QNetworkReply*> replies;
         
         QMap<QString, QTime> timers;
         QMap<QString, double> kibps;
@@ -95,52 +98,6 @@ class RankingPerformer : public QObject
         void checkIfFinished();
 
         QString errorMessage;
-};
-
-class ReplyTimeout : public QObject
-{
-    Q_OBJECT
-
-    public:
-        enum HandleMethod { Abort, Close };
-        
-        ReplyTimeout(QNetworkReply* reply, const int timeout, HandleMethod method = Abort) : QObject(reply), m_method(method)
-        {
-            Q_ASSERT(reply);
-            
-            if (reply && reply->isRunning()) {
-                m_timer.start(timeout, this);
-            }
-        }
-        
-        static void set(QNetworkReply* reply, const int timeout, HandleMethod method = Abort)
-        {
-            new ReplyTimeout(reply, timeout, method);
-        }
-
-    protected:
-        void timerEvent(QTimerEvent *ev)
-        {
-            if (!m_timer.isActive() || ev->timerId() != m_timer.timerId()) {
-                return;
-            }
-    
-            auto reply = static_cast<QNetworkReply*>(parent());
-    
-            if (reply->isRunning()) {
-                if (m_method == Close) {
-                    reply->close();
-                } else if (m_method == Abort) {
-                    reply->abort();
-                }
-            }
-            
-            m_timer.stop();
-        }
-    
-    private:
-        QBasicTimer m_timer;
-        HandleMethod m_method;
 };
 
 #endif

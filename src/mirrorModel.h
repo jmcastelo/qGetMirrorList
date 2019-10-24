@@ -56,6 +56,7 @@ class MirrorModel : public QAbstractTableModel
 
     public slots:
         void setMirrorList(QList<Mirror> ml);
+        void cancelRankMirrorList();
 
     private slots:
         void setMirrorSpeeds(QMap<QString, double> speeds);

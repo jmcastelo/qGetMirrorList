@@ -121,8 +121,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     rankingProgressBar = new QProgressBar(this);
     rankingProgressBar->setMinimum(0);
 
+    cancelRankingButton = new QPushButton("Cancel");
+
     waitLayout->addWidget(waitLabel);
     waitLayout->addWidget(rankingProgressBar);
+    waitLayout->addWidget(cancelRankingButton);
 
     waitForRankingDialog->setLayout(waitLayout);
 
@@ -169,6 +172,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::setProgressBarMax, rankingProgressBar, &QProgressBar::setMaximum);
     connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
     connect(mirrorModel, &MirrorModel::rankingMirrorsErrors, this, &MainWindow::showRankingErrorsDialog);
+    connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankMirrorList);
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);

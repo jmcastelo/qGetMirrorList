@@ -21,7 +21,6 @@
 RsyncProcess::RsyncProcess (QObject *parent): QObject(parent)
 {
     connect(&rsync, &QProcess::started, this, &RsyncProcess::startTimer);
-    connect(&rsync, &QProcess::errorOccurred, this, &RsyncProcess::processError);
     connect(&rsync, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &RsyncProcess::getSpeed);
 }
 
@@ -36,7 +35,7 @@ void RsyncProcess::start()
 {
     path = QString("/tmp/core.db.%1").arg(index);
 
-    QStringList arguments = { "-avL", "--no-h", "--no-motd", QString("--contimeout=%1").arg(timeout/1000), url, path };
+    QStringList arguments = { "-avL", "--no-h", "--no-motd", QString("--contimeout=%1").arg(timeout), url, path };
 
     QString program = "rsync";
 
@@ -62,11 +61,10 @@ void RsyncProcess::getSpeed(int exitCode, QProcess::ExitStatus exitStatus)
 
             emit processFinished(index, url, speed);
         } else {
-            
             emit processFailed(index, url, getRsyncError(exitCode));
         }
     } else {
-        emit processFailed(index, url, QString("rsync crashed"));
+        emit processCancelled(index);
     }
 }
 
@@ -139,33 +137,11 @@ QString RsyncProcess::getRsyncError(int exitCode)
     return errorMessage;
 }
 
-void RsyncProcess::processError(QProcess::ProcessError error)
-{
-    QString errorMessage;
-
-    switch (error) {
-        case QProcess::FailedToStart:
-            errorMessage = "rsync failed to start";
-            break;
-        case QProcess::Crashed:
-            errorMessage = "rsync crashed";
-            break;
-        case QProcess::Timedout:
-            errorMessage = "rsync timed out";
-            break;
-        default:
-            errorMessage = "rsync error";
-    }
-
-    emit processFailed(index, url, errorMessage);
-}
-
 RankingPerformer::RankingPerformer(QObject *parent) : QObject(parent)
 {
     dbSubPath = "extra/os/x86_64/extra.db";
     //dbSubPath = "core/os/x86_64/core.db";
-    httpConnectionTimeout = 30000; // 30 seconds
-    rsyncConnectionTimeout = 5000; // 5 seconds
+    rsyncConnectionTimeout = 5; // 5 seconds
 
     connect(&manager, &QNetworkAccessManager::finished, this, &RankingPerformer::requestFinished);
 }
@@ -195,14 +171,17 @@ void RankingPerformer::rank(QStringList mirrorUrls)
 
     timers.clear();
     kibps.clear();
+    replies.clear();
 
     for (int i = 0; i < httpUrls.size(); i++) {
         timers[httpUrls.at(i)] = QTime();
         timers[httpUrls.at(i)].start();
 
         QNetworkReply *reply = manager.get(QNetworkRequest(QUrl(httpUrls[i].append(dbSubPath))));
-        
-        ReplyTimeout::set(reply, httpConnectionTimeout);
+
+        replies[httpUrls.at(i)] = reply;
+
+        connect(this, &RankingPerformer::cancelRanking, replies[httpUrls.at(i)], &QNetworkReply::abort);
     }
 
     if (QFileInfo::exists("/usr/bin/rsync")) {
@@ -220,8 +199,10 @@ void RankingPerformer::rank(QStringList mirrorUrls)
         
             rsyncProcesses.at(i)->init(i, url, rsyncConnectionTimeout);
 
-            connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
-            connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rankingFailed);
+            connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::rsyncFinished);
+            connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rsyncFailed);
+            connect(rsyncProcesses.at(i), &RsyncProcess::processCancelled, this, &RankingPerformer::rsyncCancelled);
+            connect(this, &RankingPerformer::cancelRanking, &rsyncProcesses.at(i)->rsync, &QProcess::kill);
 
             rsyncProcesses.at(i)->start();
         }
@@ -248,7 +229,7 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
 
             errorMessage.append(QString("%1\n%2: %3\n\n").arg(url).arg(statusCode).arg(reason));
         }
-    } else {
+    } else if (reply->error() != QNetworkReply::OperationCanceledError) {
         QString message = getReplyErrorMessage(reply->error());
         
         QString msg = QString("%1\n%2\n\n").arg(url).arg(message);
@@ -257,6 +238,9 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
     }
     
     timers.remove(url);
+    replies.remove(url);
+
+    disconnect(this, &RankingPerformer::cancelRanking, replies[url], &QNetworkReply::abort);
 
     nFinishedRequests++;
 
@@ -284,9 +268,6 @@ QString RankingPerformer::getReplyErrorMessage(QNetworkReply::NetworkError error
         case QNetworkReply::TimeoutError:
             message = "Connection timed out";
             break;
-        case QNetworkReply::OperationCanceledError:
-            message = QString("Operation took more than %1 seconds").arg(httpConnectionTimeout/1000);
-            break;
         case QNetworkReply::NetworkSessionFailedError:
             message = "Connection broken";
             break;
@@ -309,7 +290,7 @@ QString RankingPerformer::getReplyErrorMessage(QNetworkReply::NetworkError error
     return message;
 }
 
-void RankingPerformer::getSpeed(int index, QString url, double speed)
+void RankingPerformer::rsyncFinished(int index, QString url, double speed)
 {
     QString baseUrl = url.replace(dbSubPath, QString(""));
 
@@ -319,7 +300,35 @@ void RankingPerformer::getSpeed(int index, QString url, double speed)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    disconnect(rsyncProcesses.at(index), &RsyncProcess::processFinished, this, &RankingPerformer::getSpeed);
+    disconnect(rsyncProcesses.at(index), &RsyncProcess::processFinished, this, &RankingPerformer::rsyncFinished);
+
+    checkIfFinished();
+}
+
+void RankingPerformer::rsyncFailed(int index, QString url, QString message)
+{
+    QString baseUrl = url.replace(dbSubPath, QString(""));
+    
+    QString msg = QString("%1\n%2\n\n").arg(baseUrl).arg(message);
+
+    errorMessage.append(msg);
+
+    nFinishedRequests++;
+
+    emit oneMirrorRanked(nFinishedRequests);
+
+    disconnect(rsyncProcesses.at(index), &RsyncProcess::processFailed, this, &RankingPerformer::rsyncFailed);
+
+    checkIfFinished();
+}
+
+void RankingPerformer::rsyncCancelled(int index)
+{
+    nFinishedRequests++;
+
+    emit oneMirrorRanked(nFinishedRequests);
+
+    disconnect(rsyncProcesses.at(index), &RsyncProcess::processCancelled, this, &RankingPerformer::rsyncCancelled);
 
     checkIfFinished();
 }
@@ -331,20 +340,10 @@ void RankingPerformer::checkIfFinished()
         emit finished(kibps);
 
         rsyncProcesses.clear();
+        replies.clear();
 
         if (!errorMessage.isEmpty()) {
             emit errors(errorMessage);
         }
     }
-}
-
-void RankingPerformer::rankingFailed(int index, QString url, QString message)
-{
-    QString baseUrl = url.replace(dbSubPath, QString(""));
-    
-    QString msg = QString("%1\n%2\n\n").arg(baseUrl).arg(message);
-
-    errorMessage.append(msg);
-
-    getSpeed(index, url, 0.0);
 }

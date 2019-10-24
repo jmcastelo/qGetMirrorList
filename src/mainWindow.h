@@ -141,6 +141,7 @@ class MainWindow : public QWidget
         QFileDialog *saveMirrorListDialog;
         QDialog *waitForRankingDialog;
         QProgressBar *rankingProgressBar;
+        QPushButton *cancelRankingButton;
 };
 
 #endif

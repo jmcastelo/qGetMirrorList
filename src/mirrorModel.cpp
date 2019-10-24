@@ -236,6 +236,11 @@ void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
     emit rankingMirrorsFinished(0);
 }
 
+void MirrorModel::cancelRankMirrorList()
+{
+    ranker.cancelRanking();
+}
+
 bool MirrorModel::httpMirrorSelected()
 {
     QList<Mirror>::const_iterator mirror;
