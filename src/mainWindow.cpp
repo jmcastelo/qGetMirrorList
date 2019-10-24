@@ -398,17 +398,15 @@ void MainWindow::enableWidgets()
 
 void MainWindow::selectAllMirrors(bool state)
 {
-    if (state) {
-        // Get URL column indexes of all selected rows
-        QModelIndexList indexes = selectionModelTableView->selectedRows(Columns::url);
+    // Get URL column indexes of all selected rows
+    QModelIndexList indexes = selectionModelTableView->selectedRows(Columns::url);
 
-        QList<QModelIndex>::const_iterator index;
-        for (index = indexes.constBegin(); index != indexes.constEnd(); ++index) {
-            mirrorModel->selectMirror(index->data().toString(), true);
-        }
-    } else {
-        // Indiscriminately deselect all mirrors
-        mirrorModel->selectAllMirrors(false);
+    QList<QModelIndex>::const_iterator index;
+    for (index = indexes.constBegin(); index != indexes.constEnd(); ++index) {
+        mirrorModel->selectMirror(index->data().toString(), state);
+    }
+
+    if (!state) {
         tableView->clearSelection();
     }
 }

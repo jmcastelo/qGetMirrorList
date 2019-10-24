@@ -170,14 +170,6 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void MirrorModel::selectAllMirrors(bool selected)
-{
-    QList<Mirror>::iterator mirror;
-    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
-        mirror->selected = selected;
-    }
-}
-
 void MirrorModel::selectMirror(QString url, bool selected)
 {
     QList<Mirror>::iterator mirror;
