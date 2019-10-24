@@ -229,13 +229,17 @@ void MirrorModel::rankMirrorList()
 
 void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
 {
-    beginResetModel();
-    QList<Mirror>::iterator mirror;
-    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
-        mirror->speed = speeds.value(mirror->url, mirror->speed);
-        mirror->selected = false;
+    QMap<QString, double>::const_iterator map;
+    for (map = speeds.constBegin(); map != speeds.constEnd(); ++map) {
+        // Search index that matches url (map.key()) starting from row=0, col=0 (url column)
+        QModelIndexList indexes = match(this->index(0, 0), Qt::DisplayRole, map.key(), 1);
+        // Update mirror speed (map.value())
+        int row = indexes.first().row();
+        mirrorList[row].speed = map.value();
+        // Matched index is url column, get speed column from it to update view
+        QModelIndex speedIndex = indexes.first().siblingAtColumn(Columns::speed);
+        emit dataChanged(speedIndex, speedIndex);
     }
-    endResetModel();
 
     emit rankingMirrorsFinished(0);
 }
