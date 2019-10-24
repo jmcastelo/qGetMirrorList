@@ -35,7 +35,7 @@ class MirrorSortFilterProxyModel : public QSortFilterProxyModel
     Q_OBJECT
 
     public:
-        MirrorSortFilterProxyModel(QObject *parent = 0);
+        MirrorSortFilterProxyModel(QObject *parent = nullptr);
 
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 

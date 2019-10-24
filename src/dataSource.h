@@ -35,10 +35,10 @@ class DataSource : public QObject
     signals:
         void mirrorListReady(QList<Mirror> mirrorList);
         void countryListReady(QList<Country> countryList);
-        void networkReplyError(QNetworkReply::NetworkError error);
+        void networkReplyError(QString errorMesssage);
 
     private slots:
-        void readData(QNetworkReply *reply);
+        void requestFinished(QNetworkReply *reply);
 
     private:
         QNetworkAccessManager manager;
@@ -48,6 +48,7 @@ class DataSource : public QObject
         QList<Country> countryList;
 
         void getParsedData(QByteArray sourceData);
+        QString getReplyErrorMessage(QNetworkReply::NetworkError error);
 };
 
 #endif

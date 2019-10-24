@@ -47,7 +47,6 @@ class MirrorModel : public QAbstractTableModel
 
     signals:
         void mirrorListSet();
-        void mirrorListNetworkError(QNetworkReply::NetworkError error);
         void rankingMirrorsStarted();
         void rankingMirrorsFinished(int r);
         void rankingMirrorsErrors(QString errorMessage);

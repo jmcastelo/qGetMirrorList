@@ -86,7 +86,7 @@ class MainWindow : public QWidget
         
         void about();
         
-        void mirrorListNetworkError(QNetworkReply::NetworkError error);
+        void showJsonErrorDialog(QString errorMessage);
 
     private:
         DataSource *dataSource;

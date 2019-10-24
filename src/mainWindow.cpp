@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->setColumnHidden(Columns::active, true);
     tableView->setColumnHidden(Columns::isos, true);
 
-    cornerButton = (QPushButton*)tableView->findChild<QAbstractButton *>();
+    cornerButton = static_cast<QPushButton*>(tableView->findChild<QAbstractButton *>());
     cornerButton->setCheckable(true);
 
     selectionModelTableView = tableView->selectionModel();
@@ -176,7 +176,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::noHttpMirrorSelected, this, &MainWindow::showHttpDialog);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
     // Connections: network errors
-    connect(mirrorModel, &MirrorModel::mirrorListNetworkError, this, &MainWindow::mirrorListNetworkError);
+    connect(dataSource, &DataSource::networkReplyError, this, &MainWindow::showJsonErrorDialog);
 }
 
 void MainWindow::createMirrorActionsGroubBox()
@@ -791,10 +791,9 @@ void MainWindow::about()
     aboutBox->exec();
 }
 
-void MainWindow::mirrorListNetworkError(QNetworkReply::NetworkError error)
+void MainWindow::showJsonErrorDialog(QString errorMessage)
 {
-    QString message = QString("Error getting JSON data.\nError code %1.").arg(error);
-    QMessageBox::critical(this, tr("Error"), message);
+    QMessageBox::critical(this, tr("Error"), errorMessage);
 }
 
 void MainWindow::showRankingErrorsDialog(QString errorMessage)
