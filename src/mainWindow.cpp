@@ -198,8 +198,8 @@ void MainWindow::createMirrorActionsGroubBox()
     updateMirrorListButton->setIcon(QIcon(pixmap));
 
     getMirrorListButton->setToolTip("Fetch all available mirrors from the Internet"); 
-    saveMirrorListButton->setToolTip("Save select mirrors to chosen file");
-    rankMirrorListButton->setToolTip("Rank selected mirrors by speed");
+    saveMirrorListButton->setToolTip("Save selected mirrors to chosen file");
+    rankMirrorListButton->setToolTip("Obtain speed of selected mirrors");
     showAllMirrorsButton->setToolTip("Show all mirrors");
     updateMirrorListButton->setToolTip("Update '/etc/pacman.d/mirrorlist' with selected mirrors as root");
 
@@ -745,7 +745,7 @@ void MainWindow::updateFinished(int exitCode, QProcess::ExitStatus exitStatus)
     Q_UNUSED(exitStatus)
 
     if (exitCode == 0) {
-        QMessageBox::information(this, tr("Action"), tr("'/etc/pacman.d/mirrorlist' successfully updated."));
+        QMessageBox::information(this, tr("Action"), tr("'/etc/pacman.d/mirrorlist' successfully updated.\nBackup of previous mirrorlist in /tmp/mirrorlist.backup"));
     } else {
         QMessageBox::critical(this, tr("Error"), tr("Update failure."));
     }

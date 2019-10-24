@@ -275,6 +275,12 @@ bool MirrorModel::httpMirrorSelected()
 void MirrorModel::updateMirrorList(QStringList urls)
 {
     if (httpMirrorSelected()) {
+        // Backup existing mirrorlist
+        QProcess backup;
+        backup.start("cp", QStringList() << "/etc/pacman.d/mirrorlist" << "/tmp/mirrorlist.backup");
+        backup.waitForFinished();
+
+        // Update mirrorlist
         saveMirrorList("/tmp/mirrorlist", false, urls);
 
         QStringList args = { "cp", "/tmp/mirrorlist", "/etc/pacman.d/mirrorlist" };
