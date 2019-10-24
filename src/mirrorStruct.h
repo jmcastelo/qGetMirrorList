@@ -16,7 +16,7 @@
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef MIRRORSTRUCT_H
-#define MIRRORSTRUC_H
+#define MIRRORSTRUCT_H
 
 #include <QString>
 #include <QDateTime>

@@ -14,8 +14,24 @@ INCLUDEPATH += .
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += src/columns.h src/mainWindow.h src/mirrorParser.h src/mirrorStruct.h src/network.h src/mirrorManager.h src/mirrorModel.h src/countryModel.h src/mirrorSortFilterProxyModel.h src/ranking.h
-SOURCES += src/main.cpp src/mainWindow.cpp src/mirrorParser.cpp src/network.cpp src/mirrorManager.cpp src/mirrorModel.cpp src/countryModel.cpp src/mirrorSortFilterProxyModel.cpp src/ranking.cpp
+HEADERS += src/columns.h \
+    src/dataSource.h \
+    src/mainWindow.h \
+    src/mirrorParser.h \
+    src/mirrorStruct.h \
+    src/mirrorModel.h \
+    src/countryModel.h \
+    src/mirrorSortFilterProxyModel.h \
+    src/ranking.h
+
+SOURCES += src/main.cpp \
+    src/mainWindow.cpp \
+    src/mirrorParser.cpp \
+    src/mirrorModel.cpp \
+    src/countryModel.cpp \
+    src/mirrorSortFilterProxyModel.cpp \
+    src/ranking.cpp \
+    src/dataSource.cpp
 
 CONFIG += qt
 

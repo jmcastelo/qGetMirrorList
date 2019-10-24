@@ -26,6 +26,9 @@
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
+    // Data source
+    dataSource = new DataSource(this);
+
     // Model associated with the mirrors
     mirrorModel = new MirrorModel(this);
 
@@ -124,8 +127,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     waitForRankingDialog->setLayout(waitLayout);
 
     // Connections: actions 
-    connect(getMirrorListButton, &QPushButton::clicked, mirrorModel, &MirrorModel::getMirrorList);
-    connect(getMirrorListButton, &QPushButton::clicked, countryModel, &CountryModel::getCountryList);
+    connect(getMirrorListButton, &QPushButton::clicked, dataSource, &DataSource::getSourceData);
+    connect(dataSource, &DataSource::mirrorListReady, mirrorModel, &MirrorModel::setMirrorList);
+    connect(dataSource, &DataSource::countryListReady, countryModel, &CountryModel::setCountryList);
     connect(saveMirrorListButton, &QPushButton::clicked, this, &MainWindow::openSaveDialog);
     connect(saveMirrorListDialog, &QFileDialog::fileSelected, this, &MainWindow::saveMirrorList);
     connect(rankMirrorListButton, &QPushButton::clicked, this, &MainWindow::rankMirrorList);

@@ -17,15 +17,7 @@
 
 #include "countryModel.h"
 
-CountryModel::CountryModel(QObject *parent) : QAbstractListModel(parent)
-{
-    connect(&theMirrorManager, &MirrorManager::countryListReady, this, &CountryModel::setCountryList);
-}
-
-void CountryModel::getCountryList()
-{
-    theMirrorManager.getCountryList();
-}
+CountryModel::CountryModel(QObject *parent) : QAbstractListModel(parent) {}
 
 void CountryModel::sortCountryList()
 {

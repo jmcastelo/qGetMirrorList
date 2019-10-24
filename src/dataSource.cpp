@@ -15,32 +15,37 @@
 // You should have received a copy of the GNU General Public License
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "network.h"
+#include "dataSource.h"
 
-Network::Network(QObject *parent) : QObject(parent)
+DataSource::DataSource(QObject *parent) : QObject(parent)
 {
-    connect(&manager, &QNetworkAccessManager::finished, this, &Network::readData);
+    sourceUrl = "https://www.archlinux.org/mirrors/status/json/";
+
+    connect(&manager, &QNetworkAccessManager::finished, this, &DataSource::readData);
 }
 
-Network::~Network(){}
-
-void Network::getRequest(QUrl url)
+void DataSource::getSourceData()
 {
-    manager.get(QNetworkRequest(url));
+    manager.get(QNetworkRequest(sourceUrl));
 }
 
-void Network::readData(QNetworkReply *reply)
+void DataSource::readData(QNetworkReply *reply)
 {
     if (reply->error() == QNetworkReply::NoError) {
-        data = reply->readAll();
-        reply->deleteLater();
-        emit dataRead();
+        getParsedData(reply->readAll());
     } else {
         emit networkReplyError(reply->error());
     }
+    reply->deleteLater();
 }
 
-QByteArray Network::getData() const
+void DataSource::getParsedData(QByteArray sourceData)
 {
-    return data;
+    parser.setRawData(sourceData);
+
+    mirrorList = parser.getMirrorList();
+    countryList = parser.getCountryList();
+
+    emit mirrorListReady(mirrorList);
+    emit countryListReady(countryList);
 }

@@ -18,6 +18,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "dataSource.h"
 #include "mirrorModel.h"
 #include "countryModel.h"
 #include "mirrorSortFilterProxyModel.h"
@@ -37,7 +38,7 @@ class MainWindow : public QWidget
     Q_OBJECT
 
     public:
-        MainWindow(QWidget *parent = 0);
+        MainWindow(QWidget *parent = nullptr);
 
     private slots:
         void enableWidgets();
@@ -88,6 +89,8 @@ class MainWindow : public QWidget
         void mirrorListNetworkError(QNetworkReply::NetworkError error);
 
     private:
+        DataSource *dataSource;
+
         MirrorModel *mirrorModel;
         QTableView *tableView;
         QItemSelectionModel *selectionModelTableView;

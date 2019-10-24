@@ -18,7 +18,7 @@
 #ifndef MIRRORMODEL_H
 #define MIRRORMODEL_H
 
-#include "mirrorManager.h"
+#include "mirrorStruct.h"
 #include "ranking.h"
 #include <QAbstractTableModel>
 #include <QVariant>
@@ -30,7 +30,7 @@ class MirrorModel : public QAbstractTableModel
     Q_OBJECT
 
     public:
-        MirrorModel(QObject *parent = 0);
+        MirrorModel(QObject *parent = nullptr);
         
         int rowCount(const QModelIndex &parent = QModelIndex()) const override;
         int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -58,16 +58,14 @@ class MirrorModel : public QAbstractTableModel
         void noHttpMirrorSelected();
 
     public slots:
-        void getMirrorList();
+        void setMirrorList(QList<Mirror> ml);
 
     private slots:
-        void setMirrorList(QList<Mirror> ml);
         void setMirrorSpeeds(QMap<QString, double> speeds);
 
     private:
         QList<Mirror> mirrorList;
         QProcess updatemirrorlist;
-        MirrorManager theMirrorManager;
         RankingPerformer ranker;
         int countSelectedMirrors();
         bool httpMirrorSelected();

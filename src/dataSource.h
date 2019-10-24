@@ -15,26 +15,26 @@
 // You should have received a copy of the GNU General Public License
 // along with qGetMirrorList.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef DATASOURCE_H
+#define DATASOURCE_H
 
+#include "mirrorParser.h"
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QObject>
 
-class Network : public QObject
+
+class DataSource : public QObject
 {
     Q_OBJECT
 
     public:
-        explicit Network(QObject *parent = 0);
-        virtual ~Network();
-        void getRequest(QUrl url);
-        QByteArray getData() const;
+        DataSource(QObject *parent = nullptr);
+        void getSourceData();
 
     signals:
-        void dataRead();
+        void mirrorListReady(QList<Mirror> mirrorList);
+        void countryListReady(QList<Country> countryList);
         void networkReplyError(QNetworkReply::NetworkError error);
 
     private slots:
@@ -42,7 +42,12 @@ class Network : public QObject
 
     private:
         QNetworkAccessManager manager;
-        QByteArray data;
+        QString sourceUrl;
+        MirrorParser parser;
+        QList<Mirror> mirrorList;
+        QList<Country> countryList;
+
+        void getParsedData(QByteArray sourceData);
 };
 
 #endif
