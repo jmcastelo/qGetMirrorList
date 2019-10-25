@@ -67,8 +67,10 @@ QString DataSource::getReplyErrorMessage(QNetworkReply::NetworkError error)
             message = "Host not found";
             break;
         case QNetworkReply::TimeoutError:
-        case QNetworkReply::OperationCanceledError:
             message = "Connection timed out";
+            break;
+        case QNetworkReply::OperationCanceledError:
+            message = "Operation canceled";
             break;
         case QNetworkReply::NetworkSessionFailedError:
             message = "Connection broken";

@@ -31,15 +31,14 @@ class RsyncProcess : public QObject
     Q_OBJECT
 
     public:
-        RsyncProcess(QObject *parent = nullptr);
+        RsyncProcess(QObject *parent = nullptr, int theIndex = 0, QString theUrl = "", int theTimeout = 5);
         QProcess rsync;
-        void init(int i, QString oneUrl, int theTimeout);
         void start();
 
     signals:
-        void processFinished(int index, QString url, double speed);
-        void processFailed(int index, QString url, QString message);
-        void processCancelled(int index);
+        void processFinished(QString url, double speed);
+        void processFailed(QString url, QString message);
+        void processCanceled();
 
     private slots:
         void startTimer();
@@ -72,9 +71,9 @@ class RankingPerformer : public QObject
 
     private slots:
         void requestFinished(QNetworkReply *reply);
-        void rsyncFinished(int index, QString url, double speed);
-        void rsyncFailed(int index, QString url, QString message);
-        void rsyncCancelled(int index);
+        void rsyncFinished(QString url, double speed);
+        void rsyncFailed(QString url, QString message);
+        void rsyncCanceled();
 
     private:
         QNetworkAccessManager manager;

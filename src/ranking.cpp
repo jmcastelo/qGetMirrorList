@@ -18,17 +18,14 @@
 #include "ranking.h"
 #include <QFileInfo>
 
-RsyncProcess::RsyncProcess (QObject *parent): QObject(parent)
+RsyncProcess::RsyncProcess (QObject *parent, int theIndex, QString theUrl, int theTimeout): QObject(parent)
 {
+    index = theIndex;
+    url = theUrl;
+    timeout = theTimeout;
+
     connect(&rsync, &QProcess::started, this, &RsyncProcess::startTimer);
     connect(&rsync, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &RsyncProcess::getSpeed);
-}
-
-void RsyncProcess::init(int i, QString oneUrl, int theTimeout)
-{
-    index = i;
-    url = oneUrl;
-    timeout = theTimeout;
 }
 
 void RsyncProcess::start()
@@ -59,12 +56,12 @@ void RsyncProcess::getSpeed(int exitCode, QProcess::ExitStatus exitStatus)
 
             double speed = 1000.0*fileSize/(1024.0*timeElapsed);
 
-            emit processFinished(index, url, speed);
+            emit processFinished(url, speed);
         } else {
-            emit processFailed(index, url, getRsyncError(exitCode));
+            emit processFailed(url, getRsyncError(exitCode));
         }
     } else {
-        emit processCancelled(index);
+        emit processCanceled();
     }
 }
 
@@ -195,13 +192,11 @@ void RankingPerformer::rank(QStringList mirrorUrls)
             QString url = rsyncUrls.at(i);
             url.append(dbSubPath);
 
-            rsyncProcesses.append(new RsyncProcess(this));
+            rsyncProcesses.append(new RsyncProcess(this, i, url, rsyncConnectionTimeout));
         
-            rsyncProcesses.at(i)->init(i, url, rsyncConnectionTimeout);
-
             connect(rsyncProcesses.at(i), &RsyncProcess::processFinished, this, &RankingPerformer::rsyncFinished);
             connect(rsyncProcesses.at(i), &RsyncProcess::processFailed, this, &RankingPerformer::rsyncFailed);
-            connect(rsyncProcesses.at(i), &RsyncProcess::processCancelled, this, &RankingPerformer::rsyncCancelled);
+            connect(rsyncProcesses.at(i), &RsyncProcess::processCanceled, this, &RankingPerformer::rsyncCanceled);
             connect(this, &RankingPerformer::cancelRanking, &rsyncProcesses.at(i)->rsync, &QProcess::kill);
 
             rsyncProcesses.at(i)->start();
@@ -236,18 +231,13 @@ void RankingPerformer::requestFinished(QNetworkReply *reply)
 
         errorMessage.append(msg);
     }
-    
-    timers.remove(url);
-    replies.remove(url);
-
-    disconnect(this, &RankingPerformer::cancelRanking, replies[url], &QNetworkReply::abort);
 
     nFinishedRequests++;
 
     emit oneMirrorRanked(nFinishedRequests);
 
     checkIfFinished();
-    
+
     reply->deleteLater();
 }
 
@@ -290,7 +280,7 @@ QString RankingPerformer::getReplyErrorMessage(QNetworkReply::NetworkError error
     return message;
 }
 
-void RankingPerformer::rsyncFinished(int index, QString url, double speed)
+void RankingPerformer::rsyncFinished(QString url, double speed)
 {
     QString baseUrl = url.replace(dbSubPath, QString(""));
 
@@ -300,12 +290,10 @@ void RankingPerformer::rsyncFinished(int index, QString url, double speed)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    disconnect(rsyncProcesses.at(index), &RsyncProcess::processFinished, this, &RankingPerformer::rsyncFinished);
-
     checkIfFinished();
 }
 
-void RankingPerformer::rsyncFailed(int index, QString url, QString message)
+void RankingPerformer::rsyncFailed(QString url, QString message)
 {
     QString baseUrl = url.replace(dbSubPath, QString(""));
     
@@ -317,18 +305,14 @@ void RankingPerformer::rsyncFailed(int index, QString url, QString message)
 
     emit oneMirrorRanked(nFinishedRequests);
 
-    disconnect(rsyncProcesses.at(index), &RsyncProcess::processFailed, this, &RankingPerformer::rsyncFailed);
-
     checkIfFinished();
 }
 
-void RankingPerformer::rsyncCancelled(int index)
+void RankingPerformer::rsyncCanceled()
 {
     nFinishedRequests++;
 
     emit oneMirrorRanked(nFinishedRequests);
-
-    disconnect(rsyncProcesses.at(index), &RsyncProcess::processCancelled, this, &RankingPerformer::rsyncCancelled);
 
     checkIfFinished();
 }
@@ -341,6 +325,7 @@ void RankingPerformer::checkIfFinished()
 
         rsyncProcesses.clear();
         replies.clear();
+        timers.clear();
 
         if (!errorMessage.isEmpty()) {
             emit errors(errorMessage);

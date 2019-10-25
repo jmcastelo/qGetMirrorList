@@ -98,7 +98,6 @@ class MainWindow : public QWidget
         CountryModel *countryModel;
         QListView *listView;
         QItemSelectionModel *selectionModelListView;
-        QStringList countryList;
 
         void createMirrorActionsGroubBox();
         void createMirrorTableGroupBox();

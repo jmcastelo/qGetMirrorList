@@ -68,8 +68,6 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     listView->setResizeMode(QListView::Adjust);
 
     selectionModelListView = listView->selectionModel();
-    
-    countryList.clear();
 
     // Groups
     createMirrorActionsGroubBox();
