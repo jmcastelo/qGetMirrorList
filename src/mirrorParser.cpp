@@ -22,8 +22,18 @@
 void MirrorParser::setRawData(QByteArray data)
 {
     QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
+
     QJsonObject jsonObject = jsonDocument.object();
+
     jsonMirrorArray = jsonObject["urls"].toArray();
+
+    lastCheck = (QDateTime::fromString(jsonObject["last_check"].toString(), Qt::ISODateWithMs));
+    lastCheck.setTimeSpec(Qt::LocalTime);
+}
+
+QDateTime MirrorParser::getLastCheck()
+{
+    return lastCheck;
 }
 
 QList<Mirror> MirrorParser::getMirrorList()

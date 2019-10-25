@@ -131,6 +131,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(getMirrorListButton, &QPushButton::clicked, dataSource, &DataSource::getSourceData);
     connect(dataSource, &DataSource::mirrorListReady, mirrorModel, &MirrorModel::setMirrorList);
     connect(dataSource, &DataSource::countryListReady, countryModel, &CountryModel::setCountryList);
+    connect(dataSource, &DataSource::lastCheckReady, this, &MainWindow::setLastCheck);
     connect(saveMirrorListButton, &QPushButton::clicked, this, &MainWindow::openSaveDialog);
     connect(saveMirrorListDialog, &QFileDialog::fileSelected, this, &MainWindow::saveMirrorList);
     connect(rankMirrorListButton, &QPushButton::clicked, this, &MainWindow::rankMirrorList);
@@ -358,6 +359,12 @@ void MainWindow::createMirrorColumnSelectGroupBox()
     mirrorColumnSelectGroupBox->setLayout(layout);
 }
 
+void MainWindow::setLastCheck(QDateTime lastCheck)
+{
+    lastCheckDateTime = lastCheck;
+    setTableGroupTitle();
+}
+
 // Once user gets mirror list, enable buttons and checkboxes
 void MainWindow::enableWidgets()
 {
@@ -550,18 +557,20 @@ void MainWindow::setTableGroupTitle()
     int filterMirrors = mirrorProxyModel->rowCount();
     
     int selectedMirrors = selectionModelTableView->selectedRows(Columns::url).size();
+
+    QString lastCheck = lastCheckDateTime.toString(QString("yyyy/MM/dd HH:mm:ss"));
     
     if (filterMirrors == totalMirrors) {
         if (selectedMirrors == 0) {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Total %1]").arg(totalMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Total %1] Last check: %2").arg(totalMirrors).arg(lastCheck));
         } else {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %2 | Total %1]").arg(totalMirrors).arg(selectedMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %2 | Total %1] Last check: %3").arg(totalMirrors).arg(selectedMirrors).arg(lastCheck));
         }
     } else {
         if (selectedMirrors == 0) {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2] Last check: %3").arg(filterMirrors).arg(totalMirrors).arg(lastCheck));
         } else {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2] Last check: %4").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors).arg(lastCheck));
         }
     }
 }

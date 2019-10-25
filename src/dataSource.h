@@ -35,6 +35,7 @@ class DataSource : public QObject
     signals:
         void mirrorListReady(QList<Mirror> mirrorList);
         void countryListReady(QList<Country> countryList);
+        void lastCheckReady(QDateTime lastCheck);
         void networkReplyError(QString errorMesssage);
 
     private slots:
@@ -44,6 +45,7 @@ class DataSource : public QObject
         QNetworkAccessManager manager;
         QString sourceUrl;
         MirrorParser parser;
+        QDateTime lastCheck;
         QList<Mirror> mirrorList;
         QList<Country> countryList;
 

@@ -60,6 +60,8 @@ class MainWindow : public QWidget
         void setActiveColumn(int state);
         void setIsosColumn(int state);
         
+        void setLastCheck(QDateTime lastCheck);
+
         void setTableGroupTitle();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
@@ -89,6 +91,8 @@ class MainWindow : public QWidget
 
     private:
         DataSource *dataSource;
+
+        QDateTime lastCheckDateTime;
 
         MirrorModel *mirrorModel;
         QTableView *tableView;

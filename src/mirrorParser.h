@@ -32,6 +32,7 @@ class MirrorParser
 
         QList<Mirror> mirrorList;
         QList<Country> countryList;
+        QDateTime lastCheck;
         
         void parseMirrorList();
         void parseCountries();
@@ -46,6 +47,7 @@ class MirrorParser
         
         QList<Mirror> getMirrorList();
         QList<Country> getCountryList();
+        QDateTime getLastCheck();
 };
 
 #endif

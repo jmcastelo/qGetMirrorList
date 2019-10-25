@@ -47,9 +47,11 @@ void DataSource::getParsedData(QByteArray sourceData)
 
     mirrorList = parser.getMirrorList();
     countryList = parser.getCountryList();
+    lastCheck = parser.getLastCheck();
 
     emit mirrorListReady(mirrorList);
     emit countryListReady(countryList);
+    emit lastCheckReady(lastCheck);
 }
 
 QString DataSource::getReplyErrorMessage(QNetworkReply::NetworkError error)
