@@ -38,10 +38,9 @@ class MirrorModel : public QAbstractTableModel
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         
-        void selectMirror(QString url, bool selected);
-        void saveMirrorList(const QString file, bool allowRsync, QStringList urls);
-        void rankMirrorList();
-        void updateMirrorList(QStringList urls);
+        void saveMirrorList(const QString file, QModelIndexList urlIndexes);
+        void rankMirrorList(QModelIndexList urlIndexes);
+        void updateMirrorList(QModelIndexList urlIndexes);
 
     signals:
         void mirrorListSet();
@@ -65,7 +64,8 @@ class MirrorModel : public QAbstractTableModel
         QList<Mirror> mirrorList;
         QProcess updatemirrorlist;
         RankingPerformer ranker;
-        bool httpMirrorSelected();
+
+        void filterHttpIndexes(QModelIndexList *urlIndexes);
 };
 
 #endif

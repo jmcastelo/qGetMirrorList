@@ -63,7 +63,7 @@ class MainWindow : public QWidget
         void setIsosColumn(int state);
         
         void setLastCheck(QDateTime lastCheck);
-        void setGettingMirrorListStatusMessage();
+        void showGettingMirrorListStatusMessage();
         void setTableGroupTitle();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
@@ -79,8 +79,8 @@ class MainWindow : public QWidget
         void saveDialogFinished(int result);
         
         void rankMirrorList();
-        void setRankingStartedStatusMessage();
-        void setRankingFinishedStatusMessage();
+        void showRankingStartedStatusMessage();
+        void showRankingFinishedStatusMessage();
         void showRankingErrorsDialog(QString errorMessage);
         
         void updateMirrorList();

@@ -39,7 +39,6 @@ struct Mirror
     bool isos;
     bool ipv4;
     bool ipv6;
-    bool selected;
     QPixmap flag;
     double speed;
 };

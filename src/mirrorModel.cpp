@@ -170,18 +170,7 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void MirrorModel::selectMirror(QString url, bool selected)
-{
-    QList<Mirror>::iterator mirror;
-    for (mirror = mirrorList.begin(); mirror != mirrorList.end(); ++mirror) {
-        if (mirror->url == url) {
-            mirror->selected = selected;
-            break;
-        }
-    }
-}
-
-void MirrorModel::saveMirrorList(const QString file, bool allowRsync, QStringList urls)
+void MirrorModel::saveMirrorList(const QString file, QModelIndexList urlIndexes)
 {
     QFile outFile(file);
 
@@ -195,28 +184,23 @@ void MirrorModel::saveMirrorList(const QString file, bool allowRsync, QStringLis
         out << "## Generated on " << nowString << "\n";
         out << "## with qGetMirrorList" << "\n" << "##" << "\n";
 
-        for (int i = 0; i < urls.size(); i++) {
-            if ((urls.at(i).startsWith("rsync") && allowRsync) ||
-                urls.at(i).startsWith("http")) {
-                    out << "Server = " << urls.at(i) << "$repo/os/$arch\n";
-            }
+        for (int i = 0; i < urlIndexes.size(); i++) {
+            out << "Server = " << urlIndexes.at(i).data().toString() << "$repo/os/$arch\n";
         }
     }
 }
 
-void MirrorModel::rankMirrorList()
+void MirrorModel::rankMirrorList(QModelIndexList urlIndexes)
 {
-    QStringList mirrorUrls;
+    QStringList urls;
 
-    for (int i = 0; i < mirrorList.size(); i++) {
-        if (mirrorList.at(i).selected) {
-            mirrorUrls.append(mirrorList.at(i).url);
-        }
+    for (int i = 0; i < urlIndexes.size(); i++) {
+        urls.append(urlIndexes.at(i).data().toString());
     }
 
     emit rankingMirrorsStarted();
 
-    ranker.rank(mirrorUrls);
+    ranker.rank(urls);
 }
 
 void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
@@ -224,7 +208,7 @@ void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
     QMap<QString, double>::const_iterator map;
     for (map = speeds.constBegin(); map != speeds.constEnd(); ++map) {
         // Search index that matches url (map.key()) starting from row=0, col=0 (url column)
-        QModelIndexList indexes = match(this->index(0, 0), Qt::DisplayRole, map.key(), 1);
+        QModelIndexList indexes = match(index(0, 0), Qt::DisplayRole, map.key(), 1);
         // Update mirror speed (map.value())
         int row = indexes.first().row();
         mirrorList[row].speed = map.value();
@@ -241,34 +225,38 @@ void MirrorModel::cancelRankMirrorList()
     ranker.cancelRanking();
 }
 
-bool MirrorModel::httpMirrorSelected()
-{
-    QList<Mirror>::const_iterator mirror;
-    for (mirror = mirrorList.constBegin(); mirror != mirrorList.constEnd(); ++mirror) {
-        if (mirror->selected && mirror->url.startsWith("http")) {
-            return true;
-        }
-    }
-    return false;
-}
-
 // Updating mirror list requires root privileges. Using 'pkexec' to elevate user to root.
-void MirrorModel::updateMirrorList(QStringList urls)
+void MirrorModel::updateMirrorList(QModelIndexList urlIndexes)
 {
-    if (httpMirrorSelected()) {
+    // Filter only http urls
+    filterHttpIndexes(&urlIndexes);
+
+    if (urlIndexes.isEmpty()) {
+        emit noHttpMirrorSelected();
+    } else {
         // Backup existing mirrorlist
         QProcess backup;
         backup.start("cp", QStringList() << "/etc/pacman.d/mirrorlist" << "/tmp/mirrorlist.backup");
         backup.waitForFinished();
 
         // Update mirrorlist
-        saveMirrorList("/tmp/mirrorlist", false, urls);
+        saveMirrorList("/tmp/mirrorlist", urlIndexes);
 
         QStringList args = { "cp", "/tmp/mirrorlist", "/etc/pacman.d/mirrorlist" };
         QString command = "pkexec";
-    
+
         updatemirrorlist.start(command, args);
-    } else {
-        emit noHttpMirrorSelected();
+    }
+}
+
+void MirrorModel::filterHttpIndexes(QModelIndexList *urlIndexes)
+{
+    QList<QModelIndex>::iterator index;
+    for (index = urlIndexes->begin(); index != urlIndexes->end();) {
+        if (index->siblingAtColumn(Columns::protocol).data().toString() == "rsync") {
+            index = urlIndexes->erase(index);
+        } else {
+            ++index;
+        }
     }
 }

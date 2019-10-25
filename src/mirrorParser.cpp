@@ -48,7 +48,6 @@ void MirrorParser::parseMirrorList()
 
     Mirror oneMirror;
 
-    oneMirror.selected = false;
     oneMirror.speed = 0.0;
 
     QJsonArray::const_iterator value;
