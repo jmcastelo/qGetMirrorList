@@ -32,6 +32,8 @@
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QProgressBar>
+#include <QStatusBar>
+#include <QLabel>
 
 class MainWindow : public QWidget
 {
@@ -61,7 +63,7 @@ class MainWindow : public QWidget
         void setIsosColumn(int state);
         
         void setLastCheck(QDateTime lastCheck);
-
+        void setGettingMirrorListStatusMessage();
         void setTableGroupTitle();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
@@ -74,8 +76,11 @@ class MainWindow : public QWidget
         void filterByIPv6(int state);
 
         void saveMirrorList(const QString file);
+        void saveDialogFinished(int result);
         
         void rankMirrorList();
+        void setRankingStartedStatusMessage();
+        void setRankingFinishedStatusMessage();
         void showRankingErrorsDialog(QString errorMessage);
         
         void updateMirrorList();
@@ -108,7 +113,11 @@ class MainWindow : public QWidget
         void createMirrorColumnSelectGroupBox();
 
         QPushButton *cornerButton;
-        
+
+        QStatusBar *statusBar;
+        QLabel *statusBarMessageLabel;
+        QLabel *statusBarLastCheckLabel;
+
         QGroupBox *mirrorActionsGroupBox;
         QGroupBox *mirrorTableGroupBox;
         QGroupBox *mirrorColumnSelectGroupBox;

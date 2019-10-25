@@ -19,7 +19,6 @@
 #include "columns.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QFileInfo>
@@ -81,8 +80,16 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     QGridLayout *mainLayout = new QGridLayout(this);
 
+    statusBar = new QStatusBar(this);
+    statusBar->setSizeGripEnabled(false);
+    statusBar->showMessage("Please get the latest mirror list");
+
+    statusBarLastCheckLabel = new QLabel(this);
+    statusBar->addPermanentWidget(statusBarLastCheckLabel);
+
     mainLayout->addWidget(mirrorActionsGroupBox, 0, 0);
     mainLayout->addLayout(vLayout, 0, 1);
+    mainLayout->addWidget(statusBar, 1, 0, 1, 2);
 
     mainLayout->setColumnStretch(0, 1);
     mainLayout->setColumnStretch(1, 10);
@@ -129,6 +136,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     // Connections: actions 
     connect(getMirrorListButton, &QPushButton::clicked, dataSource, &DataSource::getSourceData);
+    connect(getMirrorListButton, &QPushButton::clicked, this, &MainWindow::setGettingMirrorListStatusMessage);
     connect(dataSource, &DataSource::mirrorListReady, mirrorModel, &MirrorModel::setMirrorList);
     connect(dataSource, &DataSource::countryListReady, countryModel, &CountryModel::setCountryList);
     connect(dataSource, &DataSource::lastCheckReady, this, &MainWindow::setLastCheck);
@@ -167,7 +175,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, rankingProgressBar, &QProgressBar::reset);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, this, &MainWindow::setRankingStartedStatusMessage);
     connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, waitForRankingDialog, &QDialog::done);
+    connect(mirrorModel, &MirrorModel::rankingMirrorsFinished, this, &MainWindow::setRankingFinishedStatusMessage);
     connect(mirrorModel, &MirrorModel::setProgressBarMax, rankingProgressBar, &QProgressBar::setMaximum);
     connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
     connect(mirrorModel, &MirrorModel::rankingMirrorsErrors, this, &MainWindow::showRankingErrorsDialog);
@@ -177,6 +187,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
     connect(mirrorModel, &MirrorModel::noHttpMirrorSelected, this, &MainWindow::showHttpDialog);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
+    // Connections: save dialog
+    connect(saveMirrorListDialog, &QDialog::finished, this, &MainWindow::saveDialogFinished);
     // Connections: network errors
     connect(dataSource, &DataSource::networkReplyError, this, &MainWindow::showJsonErrorDialog);
 }
@@ -307,6 +319,7 @@ void MainWindow::createMirrorActionsGroubBox()
 void MainWindow::createMirrorTableGroupBox()
 {
     QVBoxLayout *layout = new QVBoxLayout;
+
     layout->addWidget(tableView);
     
     mirrorTableGroupBox = new QGroupBox("Mirrors");
@@ -362,7 +375,18 @@ void MainWindow::createMirrorColumnSelectGroupBox()
 void MainWindow::setLastCheck(QDateTime lastCheck)
 {
     lastCheckDateTime = lastCheck;
-    setTableGroupTitle();
+
+    QString lastCheckString = lastCheckDateTime.toString(QString("yyyy/MM/dd HH:mm:ss"));
+
+    statusBarLastCheckLabel->setText(QString("Last mirror check: %1").arg(lastCheckString));
+    statusBarLastCheckLabel->show();
+
+    statusBar->showMessage("Mirror list fetched successfully", 10000);
+}
+
+void MainWindow::setGettingMirrorListStatusMessage()
+{
+    statusBar->showMessage("Getting mirror list...");
 }
 
 // Once user gets mirror list, enable buttons and checkboxes
@@ -557,20 +581,18 @@ void MainWindow::setTableGroupTitle()
     int filterMirrors = mirrorProxyModel->rowCount();
     
     int selectedMirrors = selectionModelTableView->selectedRows(Columns::url).size();
-
-    QString lastCheck = lastCheckDateTime.toString(QString("yyyy/MM/dd HH:mm:ss"));
     
     if (filterMirrors == totalMirrors) {
         if (selectedMirrors == 0) {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Total %1] Last check: %2").arg(totalMirrors).arg(lastCheck));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Total %1]").arg(totalMirrors));
         } else {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %2 | Total %1] Last check: %3").arg(totalMirrors).arg(selectedMirrors).arg(lastCheck));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %2 | Total %1]").arg(totalMirrors).arg(selectedMirrors));
         }
     } else {
         if (selectedMirrors == 0) {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2] Last check: %3").arg(filterMirrors).arg(totalMirrors).arg(lastCheck));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors));
         } else {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2] Last check: %4").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors).arg(lastCheck));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors));
         }
     }
 }
@@ -693,8 +715,10 @@ void MainWindow::showAllMirrors()
 void MainWindow::openSaveDialog()
 {
     if(!selectionModelTableView->hasSelection()) {
-        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
+        QMessageBox::warning(this, tr("Warning"), tr("No mirrors selected.\nPlease select at least one mirror."));
+        statusBar->showMessage("Save warning: no mirrors selected", 10000);
     } else {
+        statusBar->showMessage("Saving selected mirrors...");
         saveMirrorListDialog->open();
     }
 }
@@ -713,10 +737,19 @@ void MainWindow::saveMirrorList(const QString file)
     mirrorModel->saveMirrorList(file, true, urls);
 }
 
+void MainWindow::saveDialogFinished(int result) {
+    if(result == 0) {
+        statusBar->showMessage("Save canceled", 10000);
+    } else if (result == 1) {
+        statusBar->showMessage("Selected mirrors saved", 10000);
+    }
+}
+
 void MainWindow::rankMirrorList()
 {
     if(!selectionModelTableView->hasSelection()) {
-        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one mirror."));
+        QMessageBox::warning(this, tr("Warning"), tr("No mirrors selected.\nPlease select at least one mirror."));
+        statusBar->showMessage("Ranking warning: no mirrors selected", 10000);
     } else {
         mirrorModel->rankMirrorList();
     }
@@ -725,7 +758,8 @@ void MainWindow::rankMirrorList()
 void MainWindow::updateMirrorList()
 {
     if(!selectionModelTableView->hasSelection()) {
-        QMessageBox::critical(this, tr("Error"), tr("No mirrors selected.\nPlease select at least one http/https mirror."));
+        QMessageBox::warning(this, tr("Warning"), tr("No mirrors selected.\nPlease select at least one http/https mirror."));
+        statusBar->showMessage("Update warning: no mirrors selected", 10000);
     } else {
         // Get 1st column (URLs) indexes of all selected rows
         QModelIndexList indexes = tableView->selectionModel()->selectedRows(0);
@@ -736,6 +770,7 @@ void MainWindow::updateMirrorList()
             urls.append(indexes.at(i).data().toString());
         }
 
+        statusBar->showMessage("Updating mirror list...");
         mirrorModel->updateMirrorList(urls);
     }
 }
@@ -746,8 +781,10 @@ void MainWindow::updateFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     if (exitCode == 0) {
         QMessageBox::information(this, tr("Action"), tr("'/etc/pacman.d/mirrorlist' successfully updated.\nBackup of previous mirrorlist in /tmp/mirrorlist.backup"));
+        statusBar->showMessage("Update successful", 10000);
     } else {
         QMessageBox::critical(this, tr("Error"), tr("Update failure."));
+        statusBar->showMessage("Update error", 10000);
     }
 }
 
@@ -758,11 +795,13 @@ void MainWindow::updateMirrorListError(QProcess::ProcessError error)
     } else {
         QMessageBox::critical(this, tr("Error"), tr("Error updating '/etc/pacman.d/mirrorlist'"));
     }
+    statusBar->showMessage("Update error", 10000);
 }
 
 void MainWindow::showHttpDialog()
 {
-    QMessageBox::critical(this, tr("Error"), tr("No mirror with http or https protocols selected.\nPlease select at least one for Pacman use."));
+    QMessageBox::warning(this, tr("Warning"), tr("No mirror with http or https protocols selected.\nPlease select at least one for Pacman use."));
+    statusBar->showMessage("Update warning: select only http/https mirrors", 10000);
 }
 
 void MainWindow::about()
@@ -794,9 +833,21 @@ void MainWindow::about()
 void MainWindow::showJsonErrorDialog(QString errorMessage)
 {
     QMessageBox::critical(this, tr("Error"), errorMessage);
+    statusBar->showMessage("Error fetching mirror list", 10000);
 }
 
 void MainWindow::showRankingErrorsDialog(QString errorMessage)
 {
     QMessageBox::critical(this, tr("Error ranking following mirrors"), errorMessage);
+    statusBar->showMessage("Ranking finished with errors", 10000);
+}
+
+void MainWindow::setRankingStartedStatusMessage()
+{
+    statusBar->showMessage("Ranking selected mirrors...");
+}
+
+void MainWindow::setRankingFinishedStatusMessage()
+{
+    statusBar->showMessage("Ranking finished", 10000);
 }
