@@ -17,6 +17,7 @@ INCLUDEPATH += .
 HEADERS += src/columns.h \
     src/dataSource.h \
     src/mainWindow.h \
+    src/mirrorDnDProxyModel.h \
     src/mirrorParser.h \
     src/mirrorStruct.h \
     src/mirrorModel.h \
@@ -26,6 +27,7 @@ HEADERS += src/columns.h \
 
 SOURCES += src/main.cpp \
     src/mainWindow.cpp \
+    src/mirrorDnDProxyModel.cpp \
     src/mirrorParser.cpp \
     src/mirrorModel.cpp \
     src/countryModel.cpp \

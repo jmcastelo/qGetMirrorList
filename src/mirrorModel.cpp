@@ -17,6 +17,7 @@
 
 #include "mirrorModel.h"
 #include "columns.h"
+#include <QBuffer>
 
 MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -34,13 +35,15 @@ void MirrorModel::setMirrorList(QList<Mirror> ml)
     beginResetModel();
     mirrorList = ml;
     endResetModel();
-    
+
     emit mirrorListSet();
 }
 
 int MirrorModel::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent)
+    if (parent.isValid()) {
+        return 0;
+    }
     return mirrorList.size();
 }
 

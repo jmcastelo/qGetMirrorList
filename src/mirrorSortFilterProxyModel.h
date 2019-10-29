@@ -19,6 +19,7 @@
 #define MIRRORSORTFILTERPROXYMODEL_H
 
 #include <QSortFilterProxyModel>
+#include <QMimeData>
 
 struct MirrorFilter
 {
@@ -30,9 +31,13 @@ struct MirrorFilter
     int ipv6;
 };
 
+class MirrorDnDProxyModel;
+
 class MirrorSortFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+
+    friend class MirrorDnDProxyModel;
 
     public:
         MirrorSortFilterProxyModel(QObject *parent = nullptr);

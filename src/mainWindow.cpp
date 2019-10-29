@@ -36,10 +36,14 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     mirrorProxyModel->setSourceModel(mirrorModel);
     mirrorProxyModel->setDynamicSortFilter(true);
 
-    // Table view associated with mirror model through proxy
-    tableView = new QTableView;
+    // Mirror drag and drop proxy model
+    mirrorDnDProxyModel = new MirrorDnDProxyModel(this);
+    mirrorDnDProxyModel->setSourceModel(mirrorProxyModel);
 
-    tableView->setModel(mirrorProxyModel);
+    // Table view associated with mirror model through proxy
+    tableView = new QTableView(this);
+
+    tableView->setModel(mirrorDnDProxyModel);
 
     tableView->setSelectionMode(QAbstractItemView::MultiSelection);
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -48,11 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     tableView->horizontalHeader()->setSectionsMovable(true);
 
+    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     tableView->verticalHeader()->setSectionsMovable(true);
-    tableView->verticalHeader()->setDragEnabled(true);
-    tableView->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
-    tableView->verticalHeader()->setAcceptDrops(true);
-    tableView->verticalHeader()->setDropIndicatorShown(true);
+    tableView->verticalHeader()->setSectionsClickable(false);
 
     tableView->setAlternatingRowColors(true);
     tableView->setShowGrid(false);
@@ -156,11 +158,20 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(rankMirrorListButton, &QPushButton::clicked, this, &MainWindow::rankMirrorList);
     connect(updateMirrorListButton, &QPushButton::clicked, this, &MainWindow::updateMirrorList);
     connect(showAllMirrorsButton, &QPushButton::clicked, this, &MainWindow::showAllMirrors);
+
     // Connections: various
     connect(cornerButton, &QPushButton::clicked, this, &MainWindow::selectAllMirrors);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::enableWidgets);
     connect(mirrorModel, &MirrorModel::mirrorListSet, this, &MainWindow::setTableGroupTitle);
     connect(selectionModelTableView, &QItemSelectionModel::selectionChanged, this, &MainWindow::selectMirrors);
+
+    // Connections: drag and drop
+    connect(tableView->verticalHeader(), &QHeaderView::sectionCountChanged, mirrorDnDProxyModel, &MirrorDnDProxyModel::setVerticalSectionsList);
+    connect(tableView->verticalHeader(), &QHeaderView::sectionMoved, mirrorDnDProxyModel, &MirrorDnDProxyModel::reorderVerticalSectionsList);
+    connect(tableView->horizontalHeader(), &QHeaderView::sectionClicked, mirrorDnDProxyModel, &MirrorDnDProxyModel::resetVerticalSectionsList);
+    connect(tableView->verticalHeader(), &QHeaderView::sectionCountChanged, this, &MainWindow::saveVerticalHeaderState);
+    connect(mirrorDnDProxyModel, &MirrorDnDProxyModel::verticalSectionsListReordered, this, &MainWindow::restoreVerticalHeaderState);
+
     // Connections: columns
     connect(urlColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setUrlColumn);
     connect(countryColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setCountryColumn);
@@ -174,6 +185,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(ipv6ColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIPv6Column);
     connect(activeColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setActiveColumn);
     connect(isosColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setIsosColumn);
+
     // Connections: filters
     connect(selectionModelListView, &QItemSelectionModel::selectionChanged, this, &MainWindow::filterByCountry); 
     connect(httpCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByHttp);
@@ -183,6 +195,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(isosCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIsos);
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
+
     // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, rankingProgressBar, &QProgressBar::reset);
@@ -193,13 +206,16 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(mirrorModel, &MirrorModel::setProgressBarValue, rankingProgressBar, &QProgressBar::setValue);
     connect(mirrorModel, &MirrorModel::rankingMirrorsErrors, this, &MainWindow::showRankingErrorsDialog);
     connect(cancelRankingButton, &QPushButton::clicked, mirrorModel, &MirrorModel::cancelRankMirrorList);
+
     // Connections: update & about
     connect(mirrorModel, &MirrorModel::noHttpMirrorSelected, this, &MainWindow::showHttpDialog);
     connect(mirrorModel, &MirrorModel::updateMirrorListFinished, this, &MainWindow::updateFinished);
     connect(mirrorModel, &MirrorModel::updateMirrorListError, this, &MainWindow::updateMirrorListError);
     connect(aboutButton, &QPushButton::clicked, this, &MainWindow::about);
+
     // Connections: save dialog
     connect(saveMirrorListDialog, &QDialog::finished, this, &MainWindow::saveDialogFinished);
+
     // Connections: network errors
     connect(dataSource, &DataSource::networkReplyError, this, &MainWindow::showJsonErrorDialog);
 }
@@ -440,6 +456,19 @@ void MainWindow::enableWidgets()
     mirrorProxyModel->setLeastRestrictiveFilter();
 }
 
+void MainWindow::saveVerticalHeaderState(int oldCount, int newCount)
+{
+    Q_UNUSED(oldCount)
+    Q_UNUSED(newCount)
+    verticalHeaderState = tableView->verticalHeader()->saveState();
+}
+
+void MainWindow::restoreVerticalHeaderState()
+{
+    tableView->verticalHeader()->restoreState(verticalHeaderState);
+    statusBar->showMessage("Drag & drop", 10000);
+}
+
 void MainWindow::selectAllMirrors(bool state)
 {
     if (!state) {
@@ -467,6 +496,8 @@ void MainWindow::setUrlColumn(int state)
         tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setCountryColumn(int state)
@@ -476,6 +507,8 @@ void MainWindow::setCountryColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::country, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setProtocolColumn(int state)
@@ -485,6 +518,8 @@ void MainWindow::setProtocolColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::protocol, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setCompletionColumn(int state)
@@ -494,6 +529,8 @@ void MainWindow::setCompletionColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::completion_pct, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setScoreColumn(int state)
@@ -503,6 +540,8 @@ void MainWindow::setScoreColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::score, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setSpeedColumn(int state)
@@ -512,6 +551,8 @@ void MainWindow::setSpeedColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::speed, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setSyncColumn(int state)
@@ -521,6 +562,8 @@ void MainWindow::setSyncColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::last_sync, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setDelayColumn(int state)
@@ -530,6 +573,8 @@ void MainWindow::setDelayColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::delay, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setIPv4Column(int state)
@@ -539,6 +584,8 @@ void MainWindow::setIPv4Column(int state)
     } else {
         tableView->setColumnHidden(Columns::ipv4, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setIPv6Column(int state)
@@ -548,6 +595,8 @@ void MainWindow::setIPv6Column(int state)
     } else {
         tableView->setColumnHidden(Columns::ipv6, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setActiveColumn(int state)
@@ -557,6 +606,8 @@ void MainWindow::setActiveColumn(int state)
     } else {
         tableView->setColumnHidden(Columns::active, false);
     }
+
+    showColumnToggleMessage(state);
 }
 
 void MainWindow::setIsosColumn(int state)
@@ -565,6 +616,17 @@ void MainWindow::setIsosColumn(int state)
         tableView->setColumnHidden(Columns::isos, true);
     } else {
         tableView->setColumnHidden(Columns::isos, false);
+    }
+
+    showColumnToggleMessage(state);
+}
+
+void MainWindow::showColumnToggleMessage(int state)
+{
+    if (state == Qt::Unchecked) {
+        statusBar->showMessage("Column hidden", 10000);
+    } else if (state == Qt::Checked) {
+        statusBar->showMessage("Column shown", 10000);
     }
 }
 
@@ -597,10 +659,18 @@ void MainWindow::filterByCountry(const QItemSelection &selected, const QItemSele
         mirrorProxyModel->appendCountryFilter(index.data().toString());
     }
 
+    if (!items.isEmpty()) {
+        statusBar->showMessage("Country selected", 10000);
+    }
+
     items = deselected.indexes();
 
     for (const QModelIndex &index : qAsConst(items)) {
         mirrorProxyModel->removeCountryFilter(index.data().toString());
+    }
+
+    if (!items.isEmpty()) {
+        statusBar->showMessage("Country deselected", 10000);
     }
 
     tableView->resizeColumnToContents(Columns::country);
@@ -622,6 +692,8 @@ void MainWindow::filterByHttp(int state)
         }
         setTableGroupTitle();
     }
+
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByHttps(int state)
@@ -638,6 +710,8 @@ void MainWindow::filterByHttps(int state)
         }
         setTableGroupTitle();
     }
+
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByRsync(int state)
@@ -654,18 +728,22 @@ void MainWindow::filterByRsync(int state)
         }
         setTableGroupTitle();
     }
+
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByActive(int state)
 {
     mirrorProxyModel->setActiveFilter(state);
     setTableGroupTitle();
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByIsos(int state)
 {
     mirrorProxyModel->setIsosFilter(state);
     setTableGroupTitle();
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByIPv4(int state)
@@ -676,6 +754,7 @@ void MainWindow::filterByIPv4(int state)
         mirrorProxyModel->setIPv4Filter(state);
         setTableGroupTitle();
     }
+    showFilteringMessage(state);
 }
 
 void MainWindow::filterByIPv6(int state)
@@ -685,6 +764,16 @@ void MainWindow::filterByIPv6(int state)
     } else {
         mirrorProxyModel->setIPv6Filter(state);
         setTableGroupTitle();
+    }
+    showFilteringMessage(state);
+}
+
+void MainWindow::showFilteringMessage(int state)
+{
+    if (state == Qt::PartiallyChecked) {
+        statusBar->showMessage("Filter disabled", 10000);
+    } else if (state == Qt::Checked || state == Qt::Unchecked) {
+        statusBar->showMessage("Filter enabled", 10000);
     }
 }
 
@@ -701,7 +790,7 @@ void MainWindow::showAllMirrors()
     ipv4CheckBox->setCheckState(Qt::PartiallyChecked);
     ipv6CheckBox->setCheckState(Qt::PartiallyChecked);
 
-    //selectionModelListView->clearSelection();
+    selectionModelListView->clearSelection();
 }
 
 void MainWindow::openSaveDialog()
@@ -778,7 +867,7 @@ void MainWindow::updateMirrorListError(QProcess::ProcessError error)
 
 void MainWindow::showHttpDialog()
 {
-    QMessageBox::warning(this, tr("Warning"), tr("No mirror with http or https protocols selected.\nPlease select at least one for Pacman use."));
+    QMessageBox::warning(this, tr("Warning"), tr("No mirror with http or https protocol selected.\nPlease select at least one for Pacman use."));
     statusBar->showMessage("Update warning: no http/https mirror selected", 10000);
 }
 

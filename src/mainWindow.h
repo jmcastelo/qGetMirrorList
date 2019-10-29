@@ -22,6 +22,7 @@
 #include "mirrorModel.h"
 #include "countryModel.h"
 #include "mirrorSortFilterProxyModel.h"
+#include "mirrorDnDProxyModel.h"
 #include <QWidget>
 #include <QTableView>
 #include <QListView>
@@ -43,8 +44,6 @@ class MainWindow : public QWidget
         MainWindow(QWidget *parent = nullptr);
 
     private slots:
-        void enableWidgets();
-        
         void selectMirrors(const QItemSelection &selected, const QItemSelection &deselected);
         void selectAllMirrors(bool state);
         void showAllMirrors();
@@ -61,10 +60,14 @@ class MainWindow : public QWidget
         void setIPv6Column(int state);
         void setActiveColumn(int state);
         void setIsosColumn(int state);
-        
+
+        void enableWidgets();
         void setLastCheck(QDateTime lastCheck);
         void showGettingMirrorListStatusMessage();
         void setTableGroupTitle();
+
+        void saveVerticalHeaderState(int oldCount, int newCount);
+        void restoreVerticalHeaderState();
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
         void filterByHttp(int state);
@@ -103,10 +106,13 @@ class MainWindow : public QWidget
         QTableView *tableView;
         QItemSelectionModel *selectionModelTableView;
         MirrorSortFilterProxyModel *mirrorProxyModel;
+        MirrorDnDProxyModel *mirrorDnDProxyModel;
 
         CountryModel *countryModel;
         QListView *listView;
         QItemSelectionModel *selectionModelListView;
+
+        QByteArray verticalHeaderState;
 
         void createMirrorActionsGroubBox();
         void createMirrorTableGroupBox();
@@ -154,6 +160,9 @@ class MainWindow : public QWidget
         QDialog *waitForRankingDialog;
         QProgressBar *rankingProgressBar;
         QPushButton *cancelRankingButton;
+
+        void showFilteringMessage(int state);
+        void showColumnToggleMessage(int state);
 };
 
 #endif
