@@ -25,12 +25,16 @@ The UI is quite self-explanatory, but a few comments can be made.
 
 The first thing to do is getting a complete, up to date mirror list by pressing the **Get mirror list** button. Once done, the table on the right is populated with mirrors and their properties. A mirror can be selected by pressing on its row. More than one mirror can be selected. Pressing on the table's top-left corner selects and deselects all of them. One can reorder the rows of the table, just drag and drop the numbered vertical headers. Note that mirror sorting done by pressing the column headers overrides custom drag and drop ordering.
 
-### Mirror filters and table display
+### Mirror filters
 
-All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. The button **Show all** can be pressed to undo all filters and return to the complete list. The table can display up to 12 columns, which can be toggled on/off with the correspoding check boxes in the **Columns** group, which is collapsible. The rows of the table can be sorted by pressing the columnn headers. Drag and drop of the headers reorders the columns. The meaning of the least obvious columns follows:
+All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. One can filter by protocol and IP version. Other filters include whether the mirrors are active, host ISOs and are syncing or out of sync. The button **Show all** can be pressed to undo all filters and return to the complete list.
+
+### Table display
+
+The table can display up to 12 columns, which can be toggled on/off with the correspoding check boxes in the **Columns** group, which is collapsible. The rows of the table can be sorted by pressing the columnn headers. Drag and drop of the headers reorders the columns. The meaning of the least obvious columns follows:
 
 * Completion percentage: The number of mirror checks that have successfully connected and disconnected from the given URL. If this is below 100%, the mirror may be unreliable.
-* Score: A very rough calculation for ranking mirrors. Lower is better. Note that out of sync mirrors have a 0 value.
+* Score: A very rough calculation for ranking mirrors. Lower is better. Note that out of sync mirrors have a value of 0.
 * Speed: Download speed of the mirror. This column gets populated when some mirrors are selected and the button **Rank selected** is pressed. Units are KiB/s.
 * Last sync: Date and time of last mirror synchronization. Missing if mirror is out of sync.
 * Delay: The calculated average mirroring delay. Due to the timing of mirror checks, any value under one hour should be viewed as ideal.
@@ -49,7 +53,7 @@ Get the mirror list and filter it according to your needs, e.g. select mirrors i
 
 ## Screenshot
 
-![Screenshot](https://i.imgur.com/DQpEn9j.png)
+![Screenshot](https://i.imgur.com/3VUTQCp.jpg)
 
 ## Credits
 
