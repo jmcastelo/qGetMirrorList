@@ -479,13 +479,6 @@ void MainWindow::restoreVerticalHeaderState()
     statusBar->showMessage("Drag & drop", 10000);
 }
 
-void MainWindow::selectAllMirrors(bool state)
-{
-    if (!state) {
-        tableView->clearSelection();
-    }
-}
-
 void MainWindow::reorderDnDSelectedRows(QList<QPair<int, int>> rowMap)
 {
     QList<QPair<int, int>>::const_iterator mapIt = rowMap.constBegin();
@@ -522,10 +515,28 @@ void MainWindow::reorderDnDSelectedRows(QList<QPair<int, int>> rowMap)
     restoreVerticalHeaderState();
 }
 
+
+void MainWindow::selectAllMirrors(bool state)
+{
+    int mirrors = selectionModelTableView->selectedRows().size();
+
+    if (!state) {
+        tableView->clearSelection();
+        statusBar->showMessage(QString("%1 mirrors deselected").arg(mirrors), 10000);
+    } else {
+        statusBar->showMessage(QString("%1 mirrors selected").arg(mirrors), 10000);
+    }
+}
+
 void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    Q_UNUSED(selected)
-    Q_UNUSED(deselected)
+    if (!selected.isEmpty()) {
+        statusBar->showMessage("Mirror selected", 10000);
+    }
+
+    if (!deselected.isEmpty()) {
+         statusBar->showMessage("Mirror deselected", 10000);
+    }
 
     setTableGroupTitle();
 }
