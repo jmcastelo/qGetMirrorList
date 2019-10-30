@@ -203,6 +203,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(isosCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIsos);
     connect(ipv4CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv4);
     connect(ipv6CheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterByIPv6);
+    connect(syncingCheckBox, &QCheckBox::stateChanged, this, &MainWindow::filterBySyncing);
 
     // Connections: ranking
     connect(mirrorModel, &MirrorModel::rankingMirrorsStarted, waitForRankingDialog, &QDialog::open);
@@ -322,21 +323,26 @@ void MainWindow::createMirrorActionsGroubBox()
     QGroupBox *otherGroupBox = new QGroupBox("Other filters");
 
     activeCheckBox = new QCheckBox("Active", this);
-    isosCheckBox = new QCheckBox("ISOs hosted", this);
+    isosCheckBox = new QCheckBox("ISOs", this);
+    syncingCheckBox = new QCheckBox("Syncing", this);
 
     activeCheckBox->setTristate(true);
     isosCheckBox->setTristate(true);
+    syncingCheckBox->setTristate(true);
 
     activeCheckBox->setCheckState(Qt::PartiallyChecked);
     isosCheckBox->setCheckState(Qt::PartiallyChecked);
+    syncingCheckBox->setCheckState(Qt::PartiallyChecked);
 
     activeCheckBox->setDisabled(true);
     isosCheckBox->setDisabled(true);
+    syncingCheckBox->setDisabled(true);
 
     QHBoxLayout *otherLayout = new QHBoxLayout;
 
     otherLayout->addWidget(activeCheckBox);
     otherLayout->addWidget(isosCheckBox);
+    otherLayout->addWidget(syncingCheckBox);
 
     otherGroupBox->setLayout(otherLayout);
 
@@ -461,6 +467,9 @@ void MainWindow::enableWidgets()
     }
     if (!ipv6CheckBox->isEnabled()) {
         ipv6CheckBox->setEnabled(true);
+    }
+    if (!syncingCheckBox->isEnabled()) {
+        syncingCheckBox->setEnabled(true);
     }
 
     mirrorProxyModel->setLeastRestrictiveFilter();
@@ -799,6 +808,13 @@ void MainWindow::filterByActive(int state)
 void MainWindow::filterByIsos(int state)
 {
     mirrorProxyModel->setIsosFilter(state);
+    setTableGroupTitle();
+    showFilteringMessage(state);
+}
+
+void MainWindow::filterBySyncing(int state)
+{
+    mirrorProxyModel->setSyncingFilter(state);
     setTableGroupTitle();
     showFilteringMessage(state);
 }

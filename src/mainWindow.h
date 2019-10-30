@@ -78,6 +78,7 @@ class MainWindow : public QWidget
         void filterByIsos(int state);
         void filterByIPv4(int state);
         void filterByIPv6(int state);
+        void filterBySyncing(int state);
 
         void saveMirrorList(const QString file);
         void saveDialogFinished(int result);
@@ -143,6 +144,7 @@ class MainWindow : public QWidget
         QCheckBox *isosCheckBox;
         QCheckBox *ipv4CheckBox;
         QCheckBox *ipv6CheckBox;
+        QCheckBox *syncingCheckBox;
 
         QCheckBox *urlColCheckBox;
         QCheckBox *countryColCheckBox;

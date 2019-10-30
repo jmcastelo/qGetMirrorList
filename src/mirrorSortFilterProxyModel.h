@@ -28,6 +28,7 @@ struct MirrorFilter
     int isos;
     int ipv4;
     int ipv6;
+    int syncing;
 };
 
 class MirrorDnDProxyModel;
@@ -53,6 +54,7 @@ class MirrorSortFilterProxyModel : public QSortFilterProxyModel
         void setIsosFilter(int isos);
         void setIPv4Filter(int ipv4);
         void setIPv6Filter(int ipv6);
+        void setSyncingFilter(int syncing);
         
         void setLeastRestrictiveFilter();
 

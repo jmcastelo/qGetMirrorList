@@ -29,6 +29,7 @@ MirrorSortFilterProxyModel::MirrorSortFilterProxyModel(QObject *parent) : QSortF
     filter.isos = 1;
     filter.ipv4 = 1;
     filter.ipv6 = 1;
+    filter.syncing = 1;
 }
 
 QVariant MirrorSortFilterProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -66,6 +67,7 @@ bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
     QModelIndex index4 = sourceModel()->index(sourceRow, Columns::ipv6, sourceParent);
     QModelIndex index5 = sourceModel()->index(sourceRow, Columns::active, sourceParent);
     QModelIndex index6 = sourceModel()->index(sourceRow, Columns::isos, sourceParent);
+    QModelIndex index7 = sourceModel()->index(sourceRow, Columns::last_sync, sourceParent);
 
     QString country = sourceModel()->data(index1).toString();
     QString protocol = sourceModel()->data(index2).toString();
@@ -73,6 +75,7 @@ bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
     QString ipv6 = sourceModel()->data(index4).toString();
     QString active = sourceModel()->data(index5).toString();
     QString isos = sourceModel()->data(index6).toString();
+    QDateTime last_sync = sourceModel()->data(index7).toDateTime();
 
     if ((filter.countryList.isEmpty() ||
         filter.countryList.contains(country)) &&
@@ -88,7 +91,10 @@ bool MirrorSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
         (filter.ipv4 == 0 && ipv4 == "No")) &&
         (filter.ipv6 == 1 ||
         (filter.ipv6 == 2 && ipv6 == "Yes") ||
-        (filter.ipv6 == 0 && ipv6 == "No"))) {
+        (filter.ipv6 == 0 && ipv6 == "No")) &&
+        (filter.syncing == 1 ||
+        (filter.syncing == 2 && last_sync.isValid()) ||
+        (filter.syncing == 0 && !last_sync.isValid()))) {
             return true;
     }
 
@@ -143,6 +149,12 @@ void MirrorSortFilterProxyModel::setIPv6Filter(int ipv6)
     invalidateFilter();
 }
 
+void MirrorSortFilterProxyModel::setSyncingFilter(int syncing)
+{
+    filter.syncing = syncing;
+    invalidateFilter();
+}
+
 void MirrorSortFilterProxyModel::setLeastRestrictiveFilter()
 {
     filter.countryList.clear();
@@ -154,6 +166,7 @@ void MirrorSortFilterProxyModel::setLeastRestrictiveFilter()
     filter.isos = 1;
     filter.ipv4 = 1;
     filter.ipv6 = 1;
+    filter.syncing = 1;
 
     invalidateFilter();
 }
