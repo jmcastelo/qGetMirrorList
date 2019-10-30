@@ -38,7 +38,7 @@ class MirrorDnDProxyModel : public QAbstractProxyModel
         void setSourceModel(QAbstractItemModel *sourceModel) override;
 
     signals:
-        void verticalSectionsListReordered();
+        void sendDnDRowMapping(QList<QPair<int, int>> rowMap);
 
     public slots:
         void setVerticalSectionsList(int oldCount, int newCount);
@@ -59,6 +59,7 @@ class MirrorDnDProxyModel : public QAbstractProxyModel
         QList<QPersistentModelIndex> layoutChangePersistentIndexes;
         QModelIndexList proxyIndexes;
         QList<int> verticalSectionsOrder;
+        void setRowMapping(int oldVisualIndex, int newVisualIndex);
 };
 
 #endif

@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(tableView->verticalHeader(), &QHeaderView::sectionMoved, mirrorDnDProxyModel, &MirrorDnDProxyModel::reorderVerticalSectionsList);
     connect(tableView->horizontalHeader(), &QHeaderView::sectionClicked, mirrorDnDProxyModel, &MirrorDnDProxyModel::resetVerticalSectionsList);
     connect(tableView->verticalHeader(), &QHeaderView::sectionCountChanged, this, &MainWindow::saveVerticalHeaderState);
-    connect(mirrorDnDProxyModel, &MirrorDnDProxyModel::verticalSectionsListReordered, this, &MainWindow::restoreVerticalHeaderState);
+    connect(mirrorDnDProxyModel, &MirrorDnDProxyModel::sendDnDRowMapping, this, &MainWindow::reorderDnDSelectedRows);
 
     // Connections: columns
     connect(urlColCheckBox, &QCheckBox::stateChanged, this, &MainWindow::setUrlColumn);
@@ -476,6 +476,42 @@ void MainWindow::selectAllMirrors(bool state)
     }
 }
 
+void MainWindow::reorderDnDSelectedRows(QList<QPair<int, int>> rowMap)
+{
+    QList<QPair<int, int>>::const_iterator mapIt = rowMap.constBegin();
+
+    QModelIndex firstIndex = tableView->model()->index(mapIt->first, 0, QModelIndex());
+    bool firstIndexSelected = selectionModelTableView->isSelected(firstIndex);
+
+    while (mapIt != rowMap.constEnd()) {
+        QModelIndex oldIndex = tableView->model()->index(mapIt->first, 0, QModelIndex());
+        QModelIndex newIndex = tableView->model()->index(mapIt->second, 0, QModelIndex());
+
+        bool newIndexSelected = selectionModelTableView->isSelected(newIndex);
+        bool oldIndexSelected = selectionModelTableView->isSelected(oldIndex);
+
+        if (newIndexSelected && !oldIndexSelected) {
+            selectionModelTableView->select(oldIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        } else if (!newIndexSelected && oldIndexSelected){
+            selectionModelTableView->select(oldIndex, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+        }
+        ++mapIt;
+    }
+
+    --mapIt;
+
+    QModelIndex lastIndex = tableView->model()->index(mapIt->first, 0, QModelIndex());
+    bool lastIndexSelected = selectionModelTableView->isSelected(lastIndex);
+
+    if (firstIndexSelected && !lastIndexSelected) {
+        selectionModelTableView->select(lastIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    } else if (!firstIndexSelected && lastIndexSelected){
+        selectionModelTableView->select(lastIndex, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+    }
+
+    restoreVerticalHeaderState();
+}
+
 void MainWindow::selectMirrors(const QItemSelection &selected, const QItemSelection &deselected)
 {
     Q_UNUSED(selected)
@@ -644,9 +680,9 @@ void MainWindow::setTableGroupTitle()
         }
     } else {
         if (selectedMirrors == 0) {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Shown %1 | Total %2]").arg(filterMirrors).arg(totalMirrors));
         } else {
-            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Filtered %1 | Total %2]").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors));
+            mirrorTableGroupBox->setTitle(QString("Mirrors [Selected %3 | Shown %1 | Total %2]").arg(filterMirrors).arg(totalMirrors).arg(selectedMirrors));
         }
     }
 }

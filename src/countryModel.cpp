@@ -18,7 +18,7 @@
 #include "countryModel.h"
 #include <algorithm>
 
-bool comparator(Country &c1, Country &c2)
+bool nameComparator(Country &c1, Country &c2)
 {
     return c1.name.compare(c2.name) < 0;
 }
@@ -27,7 +27,7 @@ CountryModel::CountryModel(QObject *parent) : QAbstractListModel(parent) {}
 
 void CountryModel::sortCountryList()
 {
-    std::sort(countryList.begin(), countryList.end(), comparator);
+    std::sort(countryList.begin(), countryList.end(), nameComparator);
 }
 
 void CountryModel::setCountryList(QList<Country> cl)

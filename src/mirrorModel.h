@@ -24,7 +24,6 @@
 #include <QVariant>
 #include <QString>
 #include <QProcess>
-#include <QMimeData>
 
 class MirrorModel : public QAbstractTableModel
 {
@@ -66,6 +65,7 @@ class MirrorModel : public QAbstractTableModel
         QProcess updatemirrorlist;
         RankingPerformer ranker;
 
+        void sortModelIndexListByRow(QModelIndexList *list);
         void filterHttpIndexes(QModelIndexList *urlIndexes);
 };
 

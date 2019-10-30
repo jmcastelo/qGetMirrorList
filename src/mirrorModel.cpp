@@ -17,7 +17,7 @@
 
 #include "mirrorModel.h"
 #include "columns.h"
-#include <QBuffer>
+#include <algorithm>
 
 MirrorModel::MirrorModel(QObject *parent) : QAbstractTableModel(parent)
 {
@@ -173,11 +173,23 @@ QVariant MirrorModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
+bool rowComparator(QModelIndex index1, QModelIndex index2)
+{
+    return index1.row() < index2.row();
+}
+
+void MirrorModel::sortModelIndexListByRow(QModelIndexList *list)
+{
+    std::sort(list->begin(), list->end(), rowComparator);
+}
+
 void MirrorModel::saveMirrorList(const QString file, QModelIndexList urlIndexes)
 {
     QFile outFile(file);
 
     if (outFile.open(QFile::WriteOnly | QFile::Truncate)) {
+        sortModelIndexListByRow(&urlIndexes);
+
         QTextStream out(&outFile);
         
         QDateTime now = QDateTime::currentDateTime();
@@ -208,6 +220,7 @@ void MirrorModel::rankMirrorList(QModelIndexList urlIndexes)
 
 void MirrorModel::setMirrorSpeeds(QMap<QString, double> speeds)
 {
+    // Map: <URL, speed>
     QMap<QString, double>::const_iterator map;
     for (map = speeds.constBegin(); map != speeds.constEnd(); ++map) {
         // Search index that matches url (map.key()) starting from row=0, col=0 (url column)

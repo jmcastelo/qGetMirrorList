@@ -232,5 +232,31 @@ void MirrorDnDProxyModel::reorderVerticalSectionsList(int logicalIndex, int oldV
         }
     }
 
-    emit verticalSectionsListReordered();
+    setRowMapping(oldVisualIndex, newVisualIndex);
+}
+
+void MirrorDnDProxyModel::setRowMapping(int oldVisualIndex, int newVisualIndex)
+{
+    QList<QPair<int, int>> rowMap;
+    QPair<int, int> pair;
+
+    if (newVisualIndex > oldVisualIndex) {
+        for (int i = oldVisualIndex; i < newVisualIndex; i++) {
+            pair.first = i;
+            pair.second = i + 1;
+            rowMap.append(pair);
+        }
+    } else if (newVisualIndex < oldVisualIndex) {
+        for (int i = oldVisualIndex; i > newVisualIndex; i--) {
+            pair.first = i;
+            pair.second = i - 1;
+            rowMap.append(pair);
+        }
+    }
+
+    pair.first = newVisualIndex;
+    pair.second = oldVisualIndex;
+    rowMap.append(pair);
+
+    emit sendDnDRowMapping(rowMap);
 }

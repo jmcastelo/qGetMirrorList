@@ -19,7 +19,6 @@
 #define MIRRORSORTFILTERPROXYMODEL_H
 
 #include <QSortFilterProxyModel>
-#include <QMimeData>
 
 struct MirrorFilter
 {

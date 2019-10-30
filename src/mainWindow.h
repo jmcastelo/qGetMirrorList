@@ -68,6 +68,7 @@ class MainWindow : public QWidget
 
         void saveVerticalHeaderState(int oldCount, int newCount);
         void restoreVerticalHeaderState();
+        void reorderDnDSelectedRows(QList<QPair<int, int>> rowMap);
 
         void filterByCountry(const QItemSelection &selected, const QItemSelection &deselected);
         void filterByHttp(int state);
@@ -163,6 +164,8 @@ class MainWindow : public QWidget
 
         void showFilteringMessage(int state);
         void showColumnToggleMessage(int state);
+
+        void sortModelIndexListByRow(QModelIndexList *indexes);
 };
 
 #endif
