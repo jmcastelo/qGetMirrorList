@@ -19,6 +19,7 @@
 #include "columns.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QSplitter>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QFileInfo>
@@ -85,10 +86,15 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     createMirrorTableGroupBox();
     createMirrorColumnSelectGroupBox();
 
-    QVBoxLayout *vLayout = new QVBoxLayout;
+    QSplitter *splitter = new QSplitter(Qt::Vertical, this);
 
-    vLayout->addWidget(mirrorColumnSelectGroupBox);
-    vLayout->addWidget(mirrorTableGroupBox);
+    splitter->addWidget(mirrorColumnSelectGroupBox);
+    splitter->addWidget(mirrorTableGroupBox);
+
+    splitter->setCollapsible(splitter->indexOf(mirrorTableGroupBox), false);
+
+    splitter->setStretchFactor(splitter->indexOf(mirrorColumnSelectGroupBox), 1);
+    splitter->setStretchFactor(splitter->indexOf(mirrorTableGroupBox), 10);
 
     QGridLayout *mainLayout = new QGridLayout(this);
 
@@ -100,7 +106,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     statusBar->addPermanentWidget(statusBarLastCheckLabel);
 
     mainLayout->addWidget(mirrorActionsGroupBox, 0, 0);
-    mainLayout->addLayout(vLayout, 0, 1);
+    mainLayout->addWidget(splitter, 0, 1);
     mainLayout->addWidget(statusBar, 1, 0, 1, 2);
 
     mainLayout->setColumnStretch(0, 1);
