@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     tableView->horizontalHeader()->setSectionResizeMode(Columns::url, QHeaderView::Stretch);
     tableView->horizontalHeader()->setSectionsMovable(true);
 
-    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     tableView->verticalHeader()->setSectionsMovable(true);
     tableView->verticalHeader()->setSectionsClickable(false);
 
@@ -79,6 +79,12 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     listView->setSelectionMode(QAbstractItemView::MultiSelection);
     listView->setResizeMode(QListView::Adjust);
 
+    QSizePolicy policy;
+    policy.setHorizontalPolicy(QSizePolicy::Maximum);
+    policy.setVerticalPolicy(QSizePolicy::Expanding);
+
+    listView->setSizePolicy(policy);
+
     selectionModelListView = listView->selectionModel();
 
     // Groups
@@ -91,10 +97,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     splitter->addWidget(mirrorColumnSelectGroupBox);
     splitter->addWidget(mirrorTableGroupBox);
 
+    splitter->setCollapsible(splitter->indexOf(mirrorColumnSelectGroupBox), true);
     splitter->setCollapsible(splitter->indexOf(mirrorTableGroupBox), false);
-
-    splitter->setStretchFactor(splitter->indexOf(mirrorColumnSelectGroupBox), 1);
-    splitter->setStretchFactor(splitter->indexOf(mirrorTableGroupBox), 10);
 
     QGridLayout *mainLayout = new QGridLayout(this);
 
@@ -109,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(splitter, 0, 1);
     mainLayout->addWidget(statusBar, 1, 0, 1, 2);
 
-    mainLayout->setColumnStretch(0, 1);
-    mainLayout->setColumnStretch(1, 10);
+    mainLayout->setColumnStretch(0, 0);
+    mainLayout->setColumnStretch(1, 1);
 
     setLayout(mainLayout);
 
@@ -120,8 +124,6 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     pixmap.load(":/images/logos/logo-small.png");
 
     setWindowIcon(QIcon(pixmap));
-
-    setGeometry(0, 0, 1300, 700);
 
     // File dialog
     saveMirrorListDialog = new QFileDialog(this);
@@ -403,6 +405,8 @@ void MainWindow::createMirrorColumnSelectGroupBox()
 
     mirrorColumnSelectGroupBox = new QGroupBox("Columns");
     mirrorColumnSelectGroupBox->setLayout(layout);
+
+    mirrorColumnSelectGroupBox->setMaximumHeight(mirrorColumnSelectGroupBox->sizeHint().height());
 }
 
 void MainWindow::setLastCheck(QDateTime lastCheck)
