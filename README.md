@@ -27,7 +27,7 @@ The first thing to do is getting a complete, up to date mirror list by pressing 
 
 ### Mirror filters and table display
 
-All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. The button **Show all** can be pressed to undo all filters and return to the complete list. The table can display up to 12 columns, which can be toggled on/off with the correspoding check boxes in the **Columns** group. The rows of the table can be sorted by pressing the columnn headers. Drag and drop of the headers reorders the columns. The meaning of the least obvious columns follows:
+All check boxes and the country list on the left group are used to filter the mirror list. More than one country can be selected. The button **Show all** can be pressed to undo all filters and return to the complete list. The table can display up to 12 columns, which can be toggled on/off with the correspoding check boxes in the **Columns** group, which is collapsible. The rows of the table can be sorted by pressing the columnn headers. Drag and drop of the headers reorders the columns. The meaning of the least obvious columns follows:
 
 * Completion percentage: The number of mirror checks that have successfully connected and disconnected from the given URL. If this is below 100%, the mirror may be unreliable.
 * Score: A very rough calculation for ranking mirrors. Lower is better. Note that out of sync mirrors have a 0 value.
@@ -39,7 +39,7 @@ For information about these features and more check the [Mirror Status service](
 
 ### Actions
 
-* **Rank selected**: Obtain the speed of the selected mirrors by downloading from them the `extra.db` database (a file less than 2MB in size). Support for rsync protocol is available if `rsync` dependency is met. Please use this action with care, do not rank many mirrors at once. This action can be canceled.
+* **Rank selected**: Obtain the speed of the selected mirrors by downloading from them the `extra.db` database (a file less than 2MB in size). Support for rsync protocol is available if `rsync` optional dependency is met. Please use this action with care, do not rank many mirrors at once. This action can be canceled.
 * **Save selected**: Save a mirror list with the selected mirrors on a chosen file. Do not select any mirror with rsync protocol if you plan to use the mirror list with Pacman. Use of rsync mirrors is supported by [powerpill](https://xyne.archlinux.ca/projects/powerpill/).
 * **Update**: Copy the selected (http/https) mirrors to a mirror file with path `/etc/pacman.d/mirrorlist`, ready for Pacman to use. This requires root privileges, so a suitable window appears for the user to enter his/her password. This action is disabled if `polkit` optional dependency is not met.
 
